@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout/Layout";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 import { useEffect } from "react";
+import { useGTM } from "@/hooks/useGTM";
 
 import Home from "@/pages/Home";
 import Products from "@/pages/Products";
@@ -20,6 +21,8 @@ import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminProducts from "@/pages/admin/AdminProducts";
+import AdminLeads from "@/pages/admin/AdminLeads";
+import AdminSettings from "@/pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +31,11 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location]);
+  return null;
+}
+
+function GTMLoader() {
+  useGTM();
   return null;
 }
 
@@ -41,6 +49,12 @@ function Router() {
       </Route>
       <Route path="/admin/products">
         <AdminGuard><AdminProducts /></AdminGuard>
+      </Route>
+      <Route path="/admin/leads">
+        <AdminGuard><AdminLeads /></AdminGuard>
+      </Route>
+      <Route path="/admin/settings">
+        <AdminGuard><AdminSettings /></AdminGuard>
       </Route>
       <Route path="/admin">
         <AdminGuard><AdminDashboard /></AdminGuard>
@@ -72,6 +86,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <GTMLoader />
           <Router />
         </WouterRouter>
         <Toaster />

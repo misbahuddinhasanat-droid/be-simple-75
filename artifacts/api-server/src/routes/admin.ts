@@ -1,9 +1,8 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
-import { db, ordersTable, productsTable } from "@workspace/db";
+import { db, ordersTable, productsTable, settingsTable, leadsTable } from "@workspace/db";
 import { eq, desc, count, sum, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
-
 const ADMIN_KEY = "besimple2024";
 
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
@@ -17,7 +16,24 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 
 router.use("/admin", requireAdmin as Parameters<typeof router.use>[0]);
 
-// ── STATS ──────────────────────────────────────────────────────────────────
+// ── PUBLIC SETTINGS ────────────────────────────────────────────────────────
+// This is intentionally public so the frontend can load GTM/Pixel IDs
+router.get("/settings", async (req, res) => {
+  try {
+    const rows = await db.select().from(settingsTable);
+    const map: Record<string, string> = {};
+    for (const r of rows) map[r.key] = r.value;
+    res.json({
+      gtmId: map["gtm_id"] ?? "",
+      pixelId: map["pixel_id"] ?? "",
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to get settings");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── ADMIN STATS ─────────────────────────────────────────────────────────────
 router.get("/admin/stats", async (req, res) => {
   try {
     const [orderStats] = await db
@@ -41,6 +57,11 @@ router.get("/admin/stats", async (req, res) => {
       .select({ count: count() })
       .from(productsTable);
 
+    const [leadCount] = await db
+      .select({ count: count() })
+      .from(leadsTable)
+      .where(eq(leadsTable.status, "new"));
+
     const recentOrders = await db
       .select()
       .from(ordersTable)
@@ -53,6 +74,7 @@ router.get("/admin/stats", async (req, res) => {
       pendingOrders: Number(pendingCount.count) || 0,
       processingOrders: Number(processingCount.count) || 0,
       totalProducts: Number(productCount.count) || 0,
+      newLeads: Number(leadCount.count) || 0,
       recentOrders: recentOrders.map(formatOrder),
     });
   } catch (err) {
@@ -61,23 +83,55 @@ router.get("/admin/stats", async (req, res) => {
   }
 });
 
-// ── ORDERS ─────────────────────────────────────────────────────────────────
+// ── ADMIN SETTINGS ──────────────────────────────────────────────────────────
+router.get("/admin/settings", async (req, res) => {
+  try {
+    const rows = await db.select().from(settingsTable);
+    const map: Record<string, string> = {};
+    for (const r of rows) map[r.key] = r.value;
+    res.json({
+      gtmId: map["gtm_id"] ?? "",
+      pixelId: map["pixel_id"] ?? "",
+    });
+  } catch (err) {
+    req.log.error({ err }, "Failed to get admin settings");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/admin/settings", async (req, res) => {
+  try {
+    const { gtmId, pixelId } = req.body as { gtmId?: string; pixelId?: string };
+
+    const upsert = async (key: string, value: string) => {
+      const existing = await db.select().from(settingsTable).where(eq(settingsTable.key, key));
+      if (existing.length > 0) {
+        await db.update(settingsTable).set({ value, updatedAt: new Date() }).where(eq(settingsTable.key, key));
+      } else {
+        await db.insert(settingsTable).values({ key, value });
+      }
+    };
+
+    if (gtmId !== undefined) await upsert("gtm_id", gtmId.trim());
+    if (pixelId !== undefined) await upsert("pixel_id", pixelId.trim());
+
+    const rows = await db.select().from(settingsTable);
+    const map: Record<string, string> = {};
+    for (const r of rows) map[r.key] = r.value;
+    res.json({ gtmId: map["gtm_id"] ?? "", pixelId: map["pixel_id"] ?? "" });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update settings");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── ADMIN ORDERS ────────────────────────────────────────────────────────────
 router.get("/admin/orders", async (req, res) => {
   try {
     const { status } = req.query as { status?: string };
-    let orders;
-    if (status && status !== "all") {
-      orders = await db
-        .select()
-        .from(ordersTable)
-        .where(eq(ordersTable.status, status))
-        .orderBy(desc(ordersTable.createdAt));
-    } else {
-      orders = await db
-        .select()
-        .from(ordersTable)
-        .orderBy(desc(ordersTable.createdAt));
-    }
+    const orders = status && status !== "all"
+      ? await db.select().from(ordersTable).where(eq(ordersTable.status, status)).orderBy(desc(ordersTable.createdAt))
+      : await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
     res.json(orders.map(formatOrder));
   } catch (err) {
     req.log.error({ err }, "Failed to list admin orders");
@@ -88,25 +142,14 @@ router.get("/admin/orders", async (req, res) => {
 router.patch("/admin/orders/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid order ID" });
-      return;
-    }
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid order ID" }); return; }
     const { status } = req.body as { status?: string };
     const validStatuses = ["confirmed", "processing", "shipped", "delivered", "cancelled"];
     if (!status || !validStatuses.includes(status)) {
-      res.status(400).json({ error: "Invalid status", valid: validStatuses });
-      return;
+      res.status(400).json({ error: "Invalid status", valid: validStatuses }); return;
     }
-    const [updated] = await db
-      .update(ordersTable)
-      .set({ status })
-      .where(eq(ordersTable.id, id))
-      .returning();
-    if (!updated) {
-      res.status(404).json({ error: "Order not found" });
-      return;
-    }
+    const [updated] = await db.update(ordersTable).set({ status }).where(eq(ordersTable.id, id)).returning();
+    if (!updated) { res.status(404).json({ error: "Order not found" }); return; }
     res.json(formatOrder(updated));
   } catch (err) {
     req.log.error({ err }, "Failed to update order");
@@ -114,7 +157,7 @@ router.patch("/admin/orders/:id", async (req, res) => {
   }
 });
 
-// ── PRODUCTS ───────────────────────────────────────────────────────────────
+// ── ADMIN PRODUCTS ──────────────────────────────────────────────────────────
 router.get("/admin/products", async (req, res) => {
   try {
     const products = await db.select().from(productsTable);
@@ -128,16 +171,9 @@ router.get("/admin/products", async (req, res) => {
 router.patch("/admin/products/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "Invalid product ID" });
-      return;
-    }
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid product ID" }); return; }
     const { price, featured, stock, name, description } = req.body as {
-      price?: number;
-      featured?: boolean;
-      stock?: number;
-      name?: string;
-      description?: string;
+      price?: number; featured?: boolean; stock?: number; name?: string; description?: string;
     };
     const updateData: Record<string, unknown> = {};
     if (price !== undefined) updateData.price = String(price);
@@ -145,21 +181,11 @@ router.patch("/admin/products/:id", async (req, res) => {
     if (stock !== undefined) updateData.stock = stock;
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-
     if (Object.keys(updateData).length === 0) {
-      res.status(400).json({ error: "No fields to update" });
-      return;
+      res.status(400).json({ error: "No fields to update" }); return;
     }
-
-    const [updated] = await db
-      .update(productsTable)
-      .set(updateData)
-      .where(eq(productsTable.id, id))
-      .returning();
-    if (!updated) {
-      res.status(404).json({ error: "Product not found" });
-      return;
-    }
+    const [updated] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
+    if (!updated) { res.status(404).json({ error: "Product not found" }); return; }
     res.json(formatProduct(updated));
   } catch (err) {
     req.log.error({ err }, "Failed to update product");
@@ -167,34 +193,64 @@ router.patch("/admin/products/:id", async (req, res) => {
   }
 });
 
+// ── ADMIN LEADS ─────────────────────────────────────────────────────────────
+router.get("/admin/leads", async (req, res) => {
+  try {
+    const { status } = req.query as { status?: string };
+    const leads = status && status !== "all"
+      ? await db.select().from(leadsTable).where(eq(leadsTable.status, status)).orderBy(desc(leadsTable.createdAt))
+      : await db.select().from(leadsTable).orderBy(desc(leadsTable.createdAt));
+    res.json(leads.map(formatLead));
+  } catch (err) {
+    req.log.error({ err }, "Failed to list leads");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/admin/leads/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid lead ID" }); return; }
+    const { status, notes } = req.body as { status?: string; notes?: string };
+    const validStatuses = ["new", "called", "converted", "not_interested"];
+    const updateData: Record<string, unknown> = {};
+    if (status && validStatuses.includes(status)) updateData.status = status;
+    if (notes !== undefined) updateData.notes = notes;
+    if (Object.keys(updateData).length === 0) {
+      res.status(400).json({ error: "No fields to update" }); return;
+    }
+    const [updated] = await db.update(leadsTable).set(updateData).where(eq(leadsTable.id, id)).returning();
+    if (!updated) { res.status(404).json({ error: "Lead not found" }); return; }
+    res.json(formatLead(updated));
+  } catch (err) {
+    req.log.error({ err }, "Failed to update lead");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── FORMATTERS ──────────────────────────────────────────────────────────────
 function formatOrder(o: typeof ordersTable.$inferSelect) {
   return {
-    id: o.id,
-    customerName: o.customerName,
-    email: o.email,
-    address: o.address,
-    city: o.city,
-    country: o.country,
-    zipCode: o.zipCode,
-    status: o.status,
-    total: parseFloat(o.total),
-    items: o.items as unknown[],
-    createdAt: o.createdAt.toISOString(),
+    id: o.id, customerName: o.customerName, email: o.email,
+    address: o.address, city: o.city, country: o.country, zipCode: o.zipCode,
+    status: o.status, total: parseFloat(o.total),
+    items: o.items as unknown[], createdAt: o.createdAt.toISOString(),
   };
 }
 
 function formatProduct(p: typeof productsTable.$inferSelect) {
   return {
-    id: p.id,
-    name: p.name,
-    description: p.description,
-    price: parseFloat(p.price),
-    imageUrl: p.imageUrl,
-    category: p.category,
-    sizes: p.sizes as string[],
-    colors: p.colors as string[],
-    featured: p.featured,
-    stock: p.stock,
+    id: p.id, name: p.name, description: p.description, price: parseFloat(p.price),
+    imageUrl: p.imageUrl, category: p.category, sizes: p.sizes as string[],
+    colors: p.colors as string[], featured: p.featured, stock: p.stock,
+  };
+}
+
+function formatLead(l: typeof leadsTable.$inferSelect) {
+  return {
+    id: l.id, phone: l.phone, name: l.name, email: l.email,
+    cartItems: l.cartItems as unknown[], cartTotal: parseFloat(l.cartTotal),
+    status: l.status, notes: l.notes, createdAt: l.createdAt.toISOString(),
   };
 }
 

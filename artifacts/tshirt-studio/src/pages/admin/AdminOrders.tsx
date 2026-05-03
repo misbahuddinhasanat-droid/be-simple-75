@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Fragment } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ShoppingBag, ChevronDown, Search, RefreshCw } from "lucide-react";
 
@@ -54,7 +54,7 @@ export default function AdminOrders() {
     setLoading(true);
     fetch(`/api/admin/orders?status=${activeStatus}`, { headers: { "x-admin-key": ADMIN_KEY } })
       .then((r) => r.json())
-      .then((d) => { setOrders(d); setLoading(false); })
+      .then((d: Order[]) => { setOrders(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, [activeStatus]);
 
@@ -97,7 +97,6 @@ export default function AdminOrders() {
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-7xl">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-black uppercase tracking-tight text-white text-3xl">Orders</h1>
@@ -108,9 +107,7 @@ export default function AdminOrders() {
           </button>
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Status tabs */}
           <div className="flex gap-1 flex-wrap">
             {STATUSES.map(s => (
               <button
@@ -126,8 +123,6 @@ export default function AdminOrders() {
               </button>
             ))}
           </div>
-
-          {/* Search */}
           <div className="relative sm:ml-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4a5568]" />
             <input
@@ -139,7 +134,6 @@ export default function AdminOrders() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-[#0d1b2a] border border-[#1a2840] rounded-sm overflow-hidden">
           {loading ? (
             <div className="p-8 space-y-3">
@@ -162,9 +156,8 @@ export default function AdminOrders() {
                 </thead>
                 <tbody className="divide-y divide-[#1a2840]">
                   {filtered.map((order) => (
-                    <>
+                    <Fragment key={order.id}>
                       <tr
-                        key={order.id}
                         className="hover:bg-[#111f33] transition-colors cursor-pointer"
                         onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
                       >
@@ -186,7 +179,7 @@ export default function AdminOrders() {
                         <td className="px-4 py-3.5 text-[#4a5568] text-xs font-bold whitespace-nowrap">
                           {new Date(order.createdAt).toLocaleDateString("en-BD", { day: "2-digit", month: "short" })}
                           <br />
-                          <span className="text-[#4a5568]">{new Date(order.createdAt).toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit" })}</span>
+                          <span>{new Date(order.createdAt).toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit" })}</span>
                         </td>
                         <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                           <div className="relative">
@@ -205,7 +198,7 @@ export default function AdminOrders() {
                         </td>
                       </tr>
                       {expandedId === order.id && (
-                        <tr key={`${order.id}-exp`} className="bg-[#060e1a]">
+                        <tr className="bg-[#060e1a]">
                           <td colSpan={8} className="px-6 py-4 border-b border-[#1a2840]">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div>
@@ -235,7 +228,7 @@ export default function AdminOrders() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
