@@ -12,13 +12,27 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 }
 router.use("/admin", requireAdmin as Parameters<typeof router.use>[0]);
 
-// ── PUBLIC SETTINGS (only expose tracking IDs, never API keys) ─────────────
+// ── PUBLIC SETTINGS (tracking IDs + store contact info) ─────────────────────
 router.get("/settings", async (req, res) => {
   try {
     const rows = await db.select().from(settingsTable);
     const map: Record<string, string> = {};
     for (const r of rows) map[r.key] = r.value;
-    res.json({ gtmId: map["gtm_id"] ?? "", pixelId: map["pixel_id"] ?? "" });
+    res.json({
+      gtmId: map["gtm_id"] ?? "",
+      pixelId: map["pixel_id"] ?? "",
+      storeInfo: {
+        whatsappNumber: map["si_whatsapp_number"] ?? "",
+        whatsappUrl: map["si_whatsapp_url"] ?? "",
+        instagramHandle: map["si_instagram_handle"] ?? "@besimple75bd",
+        instagramUrl: map["si_instagram_url"] ?? "https://instagram.com/besimple75bd",
+        facebookUrl: map["si_facebook_url"] ?? "https://facebook.com/besimple75",
+        email: map["si_email"] ?? "support@besimple75.com",
+        policyReturn: map["si_policy_return"] ?? "7-day return on unworn items",
+        policyDelivery: map["si_policy_delivery"] ?? "Dhaka: 1-2 days · Outside: 3-5 days",
+        policyPayment: map["si_policy_payment"] ?? "Cash on Delivery (COD)",
+      },
+    });
   } catch (err) {
     req.log.error({ err }, "Failed to get settings");
     res.status(500).json({ error: "Internal server error" });
@@ -68,6 +82,15 @@ router.get("/admin/settings", async (req, res) => {
       steadfastSecretKey: map["steadfast_secret_key"] ?? "",
       uddoktapayApiKey: map["uddoktapay_api_key"] ?? "",
       uddoktapayApiSecret: map["uddoktapay_api_secret"] ?? "",
+      siWhatsappNumber: map["si_whatsapp_number"] ?? "",
+      siWhatsappUrl: map["si_whatsapp_url"] ?? "",
+      siInstagramHandle: map["si_instagram_handle"] ?? "",
+      siInstagramUrl: map["si_instagram_url"] ?? "",
+      siFacebookUrl: map["si_facebook_url"] ?? "",
+      siEmail: map["si_email"] ?? "",
+      siPolicyReturn: map["si_policy_return"] ?? "",
+      siPolicyDelivery: map["si_policy_delivery"] ?? "",
+      siPolicyPayment: map["si_policy_payment"] ?? "",
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get admin settings");
@@ -88,6 +111,15 @@ router.patch("/admin/settings", async (req, res) => {
       steadfastSecretKey: "steadfast_secret_key",
       uddoktapayApiKey: "uddoktapay_api_key",
       uddoktapayApiSecret: "uddoktapay_api_secret",
+      siWhatsappNumber: "si_whatsapp_number",
+      siWhatsappUrl: "si_whatsapp_url",
+      siInstagramHandle: "si_instagram_handle",
+      siInstagramUrl: "si_instagram_url",
+      siFacebookUrl: "si_facebook_url",
+      siEmail: "si_email",
+      siPolicyReturn: "si_policy_return",
+      siPolicyDelivery: "si_policy_delivery",
+      siPolicyPayment: "si_policy_payment",
     };
     for (const [bodyKey, dbKey] of Object.entries(keyMap)) {
       if (body[bodyKey] !== undefined) {

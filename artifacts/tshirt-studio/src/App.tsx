@@ -23,6 +23,7 @@ import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminProducts from "@/pages/admin/AdminProducts";
 import AdminLeads from "@/pages/admin/AdminLeads";
 import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminStoreInfo from "@/pages/admin/AdminStoreInfo";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,9 @@ function Router() {
       </Route>
       <Route path="/admin/settings">
         <AdminGuard><AdminSettings /></AdminGuard>
+      </Route>
+      <Route path="/admin/store-info">
+        <AdminGuard><AdminStoreInfo /></AdminGuard>
       </Route>
       <Route path="/admin/dashboard">
         <AdminGuard><AdminDashboard /></AdminGuard>

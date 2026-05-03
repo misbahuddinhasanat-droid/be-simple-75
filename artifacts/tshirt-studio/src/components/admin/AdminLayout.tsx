@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import {
-  LayoutDashboard, ShoppingCart, Users, Package, Settings,
+  LayoutDashboard, ShoppingCart, Users, Package, Settings, Store,
   LogOut, ExternalLink, Menu, X, Flame, ChevronRight, Zap,
 } from "lucide-react";
 
@@ -14,7 +14,10 @@ const NAV = [
     { href: "/admin/products", icon: Package,      label: "Products" },
     { href: "/admin/leads",    icon: Users,         label: "Leads & COD" },
   ]},
-  { section: "CONFIGURATION", items: [{ href: "/admin/settings", icon: Settings, label: "Integrations" }] },
+  { section: "CONFIGURATION", items: [
+    { href: "/admin/store-info", icon: Store, label: "Store Info" },
+    { href: "/admin/settings", icon: Settings, label: "Integrations" },
+  ]},
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {

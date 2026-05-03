@@ -1,8 +1,10 @@
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,38 +16,29 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { useColors } from "@/hooks/useColors";
 
-const LINKS = [
-  {
-    icon: "phone" as const,
-    label: "WhatsApp Order",
-    sub: "Chat with us for custom orders",
-    onPress: () => Linking.openURL("https://wa.me/8801XXXXXXXXX"),
-  },
-  {
-    icon: "instagram" as const,
-    label: "Follow on Instagram",
-    sub: "@besimple75bd",
-    onPress: () => Linking.openURL("https://instagram.com/besimple75bd"),
-  },
-  {
-    icon: "facebook" as const,
-    label: "Facebook Page",
-    sub: "Latest drops & announcements",
-    onPress: () => Linking.openURL("https://facebook.com/besimple75"),
-  },
-  {
-    icon: "mail" as const,
-    label: "Contact Us",
-    sub: "support@besimple75.com",
-    onPress: () => Linking.openURL("mailto:support@besimple75.com"),
-  },
-];
+interface StoreInfo {
+  whatsappNumber: string;
+  whatsappUrl: string;
+  instagramHandle: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  email: string;
+  policyReturn: string;
+  policyDelivery: string;
+  policyPayment: string;
+}
 
-const POLICIES = [
-  { label: "Return Policy", detail: "7-day return on unworn items" },
-  { label: "Delivery", detail: "Dhaka: 1-2 days · Outside: 3-5 days" },
-  { label: "Payment", detail: "Cash on Delivery (COD)" },
-];
+const DEFAULTS: StoreInfo = {
+  whatsappNumber: "+880 1XXXXXXXXX",
+  whatsappUrl: "https://wa.me/8801000000000",
+  instagramHandle: "@besimple75bd",
+  instagramUrl: "https://instagram.com/besimple75bd",
+  facebookUrl: "https://facebook.com/besimple75",
+  email: "support@besimple75.com",
+  policyReturn: "7-day return on unworn items",
+  policyDelivery: "Dhaka: 1-2 days · Outside: 3-5 days",
+  policyPayment: "Cash on Delivery (COD)",
+};
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -53,11 +46,73 @@ export default function ProfileScreen() {
   const { isAdmin } = useAdminAuth();
   const router = useRouter();
 
+  const [info, setInfo] = useState<StoreInfo>(DEFAULTS);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = async () => {
+    try {
+      const res = await fetch("/api/settings");
+      const data = await res.json() as { storeInfo?: Partial<StoreInfo> };
+      if (data.storeInfo) {
+        setInfo(prev => ({ ...prev, ...data.storeInfo }));
+      }
+    } catch { /* use defaults */ }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
+
+  const LINKS = [
+    {
+      icon: "phone" as const,
+      label: "WhatsApp Order",
+      sub: info.whatsappNumber || "Chat with us for custom orders",
+      onPress: () => Linking.openURL(info.whatsappUrl || DEFAULTS.whatsappUrl),
+    },
+    {
+      icon: "instagram" as const,
+      label: "Follow on Instagram",
+      sub: info.instagramHandle,
+      onPress: () => Linking.openURL(info.instagramUrl || DEFAULTS.instagramUrl),
+    },
+    {
+      icon: "facebook" as const,
+      label: "Facebook Page",
+      sub: "Latest drops & announcements",
+      onPress: () => Linking.openURL(info.facebookUrl || DEFAULTS.facebookUrl),
+    },
+    {
+      icon: "mail" as const,
+      label: "Contact Us",
+      sub: info.email,
+      onPress: () => Linking.openURL(`mailto:${info.email || DEFAULTS.email}`),
+    },
+  ];
+
+  const POLICIES = [
+    { label: "Return Policy", detail: info.policyReturn },
+    { label: "Delivery", detail: info.policyDelivery },
+    { label: "Payment", detail: info.policyPayment },
+  ];
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + 90 }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
     >
       <View
         style={[
