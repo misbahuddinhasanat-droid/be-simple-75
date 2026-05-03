@@ -1,7 +1,6 @@
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
 import { useGetFeaturedProducts, useListProducts } from "@workspace/api-client-react";
-import { ArrowRight, Paintbrush, Zap, Layers } from "lucide-react";
+import { ArrowRight, Zap, Sparkles, ShoppingBag, Star } from "lucide-react";
 import { useState } from "react";
 import { QuickBuyModal } from "@/components/QuickBuyModal";
 import { useSEO } from "@/hooks/useSEO";
@@ -20,6 +19,7 @@ export default function Home() {
     description: "Be Simple 75 — premium streetwear t-shirts in Bangladesh. Anime, graphic & oversized tees from ৳599. Fast delivery to Dhaka, Chittagong, Sylhet & all BD.",
     path: "/",
   });
+
   const { data: featuredProducts, isLoading: isLoadingFeatured } = useGetFeaturedProducts();
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [quickBuyProduct, setQuickBuyProduct] = useState<ProductForModal | null>(null);
@@ -35,70 +35,122 @@ export default function Home() {
   const filters = ["All", "Anime", "Music", "Gaming", "Street"];
 
   return (
-    <div className="flex flex-col gap-24 pb-24 bg-[#0a0a0a] text-[#f0f0f0]">
-      {/* Hero Section */}
-      <section className="relative h-[90vh] min-h-[600px] flex items-center overflow-hidden bg-black border-b border-[#1f1f1f]">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-60 md:opacity-100 flex items-center justify-end pr-10 overflow-hidden pointer-events-none">
+    <div className="flex flex-col" style={{ background: "#05050f", color: "#f5f6fa" }}>
+
+      {/* ── HERO ─────────────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Animated orbs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute top-1/4 left-1/6 w-[500px] h-[500px] rounded-full blur-3xl orb-purple"
+            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.25) 0%, transparent 70%)" }}
+          />
+          <div
+            className="absolute bottom-1/4 right-1/6 w-[400px] h-[400px] rounded-full blur-3xl orb-cyan"
+            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.2) 0%, transparent 70%)" }}
+          />
+          <div
+            className="absolute top-1/3 right-1/3 w-[300px] h-[300px] rounded-full blur-3xl orb-pink"
+            style={{ background: "radial-gradient(circle, rgba(244,114,182,0.15) 0%, transparent 70%)" }}
+          />
+        </div>
+
+        {/* Grid lines */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: "linear-gradient(rgba(168,85,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }}
+        />
+
+        {/* Product image right side */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none overflow-hidden">
           <img
             src="/products/berserk-back.jpg"
             alt="Hero product"
-            className="w-full h-[120%] object-cover object-center translate-x-1/4 -rotate-6 scale-110 mix-blend-lighten opacity-80"
+            className="w-full h-full object-cover object-center opacity-20 mix-blend-luminosity scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, #05050f 0%, rgba(5,5,15,0.5) 40%, transparent 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #05050f 0%, transparent 20%, transparent 80%, #05050f 100%)" }} />
         </div>
 
-        <div className="container relative z-10 px-4 md:px-8">
-          <div className="max-w-3xl">
-            <h1 className="font-display text-6xl md:text-8xl lg:text-[140px] font-black uppercase tracking-tighter leading-[0.85] mb-8 text-white drop-shadow-2xl">
-              Wear Your <br />
-              <span className="text-[#e63329]">Loudest</span> <br />
-              Thoughts
-            </h1>
-            <p className="text-xl md:text-2xl text-zinc-400 max-w-xl mb-10 font-medium uppercase tracking-wide">
-              Raw. Unfiltered. Concrete. <br /> Premium heavyweight streetwear drops.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link href="/products" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto font-black uppercase tracking-widest text-lg h-16 px-10 bg-[#e63329] text-white hover:bg-white hover:text-black transition-colors rounded-none border-2 border-transparent flex items-center gap-2"
-                >
-                  <Zap className="w-5 h-5" fill="currentColor" />
+        {/* Hero content */}
+        <div className="container relative z-10 px-4 md:px-8 py-20">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest"
+            style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }}>
+            <Sparkles className="w-3.5 h-3.5" />
+            New Drop 2026 — Bangladesh Exclusive
+          </div>
+
+          <h1 className="font-black text-7xl md:text-9xl lg:text-[140px] uppercase leading-[0.85] mb-8 tracking-tighter">
+            <span className="block text-white">Wear</span>
+            <span className="block gradient-text">Louder.</span>
+            <span className="block text-white">Live</span>
+            <span className="block text-white">Bolder.</span>
+          </h1>
+
+          <p className="text-slate-400 text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed">
+            Premium streetwear that hits different. 
+            Anime · Music · Street · Gaming.
+            <span className="gradient-text-cyan-pink font-bold"> Only ৳599.</span>
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/products">
+              <button className="btn-ai flex items-center justify-center gap-2.5 h-14 px-8 rounded-xl text-sm">
+                <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Zap className="w-4 h-4" fill="currentColor" />
                   Shop The Drop
-                </Button>
-              </Link>
-              <Link href="/customize" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto font-black uppercase tracking-widest text-lg h-16 px-10 bg-transparent text-white border-2 border-white hover:bg-white hover:text-black transition-colors rounded-none"
-                >
-                  Enter Studio
-                </Button>
-              </Link>
-            </div>
+                </span>
+              </button>
+            </Link>
+            <Link href="/customize">
+              <button className="btn-ai-outline flex items-center justify-center gap-2 h-14 px-8 rounded-xl text-sm">
+                <Sparkles className="w-4 h-4" />
+                Enter Studio
+              </button>
+            </Link>
+          </div>
+
+          {/* Stats row */}
+          <div className="flex gap-8 mt-14 pt-10" style={{ borderTop: "1px solid rgba(168,85,247,0.15)" }}>
+            {[
+              { value: "20+", label: "Designs" },
+              { value: "৳599", label: "Starting Price" },
+              { value: "48h", label: "Delivery" },
+              { value: "BD", label: "Nationwide" },
+            ].map(({ value, label }) => (
+              <div key={label}>
+                <p className="text-2xl font-black gradient-text-purple-cyan">{value}</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">{label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="container px-4 md:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8 border-b-2 border-[#1f1f1f] pb-6">
-          <h2 className="font-display text-4xl md:text-6xl font-black uppercase tracking-tighter text-white">
-            Latest Drops
-          </h2>
+      {/* ── PRODUCTS ─────────────────────────────────────────────── */}
+      <section className="container px-4 md:px-8 py-24">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: "#a855f7" }}>
+              ✦ Latest Releases
+            </p>
+            <h2 className="font-black text-5xl md:text-7xl uppercase tracking-tighter leading-none text-white">
+              Latest <span className="gradient-text">Drops</span>
+            </h2>
+          </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
             {filters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-6 py-2 rounded-full font-bold uppercase tracking-wider text-sm transition-all border-2 ${
+                className="px-5 py-2 rounded-full font-bold uppercase tracking-wider text-xs transition-all duration-200 whitespace-nowrap"
+                style={
                   activeFilter === filter
-                    ? "bg-white text-black border-white"
-                    : "bg-transparent text-zinc-400 border-[#1f1f1f] hover:border-zinc-500 hover:text-white"
-                }`}
+                    ? { background: "linear-gradient(135deg, #a855f7, #22d3ee)", color: "white", border: "1px solid transparent" }
+                    : { background: "rgba(255,255,255,0.04)", color: "#64748b", border: "1px solid rgba(168,85,247,0.2)" }
+                }
               >
                 {filter}
               </button>
@@ -106,88 +158,86 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="space-y-4">
-                <div className="aspect-[4/5] bg-[#111] animate-pulse border border-[#1f1f1f]" />
-                <div className="h-6 bg-[#111] animate-pulse w-3/4" />
-                <div className="h-6 bg-[#111] animate-pulse w-1/4" />
+              <div key={i} className="space-y-3">
+                <div className="aspect-[4/5] rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
+                <div className="h-4 rounded animate-pulse w-3/4" style={{ background: "rgba(255,255,255,0.04)" }} />
+                <div className="h-4 rounded animate-pulse w-1/3" style={{ background: "rgba(255,255,255,0.04)" }} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {displayProducts?.slice(0, 8).map((product) => (
-              <div key={product.id} className="group block relative">
-                <div className="aspect-[4/5] overflow-hidden bg-[#050505] mb-4 relative border-2 border-[#1f1f1f] group-hover:border-[#e63329] transition-colors duration-300">
+              <div key={product.id} className="group relative product-card-hover">
+                {/* Image wrapper */}
+                <div
+                  className="aspect-[4/5] overflow-hidden mb-4 relative rounded-xl"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(168,85,247,0.12)" }}
+                >
                   <Link href={`/product/${product.id}`}>
                     <img
                       src={product.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105 cursor-pointer"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                   </Link>
 
                   {product.featured && (
-                    <div className="absolute top-3 left-3 bg-[#e63329] text-white text-[10px] font-black px-3 py-1.5 uppercase tracking-widest z-10">
+                    <div
+                      className="absolute top-3 left-3 flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-white"
+                      style={{ background: "linear-gradient(135deg, #a855f7, #22d3ee)" }}
+                    >
+                      <Star className="w-2.5 h-2.5" fill="currentColor" />
                       Hot
                     </div>
                   )}
 
-                  {/* Hover CTA strip */}
+                  {/* Hover overlay CTAs */}
                   <div className="absolute bottom-0 left-0 right-0 flex translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        setQuickBuyProduct({
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          imageUrl: product.imageUrl,
-                          sizes: product.sizes,
-                        });
+                        setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes });
                       }}
-                      className="flex-1 bg-[#e63329] hover:bg-white hover:text-black text-white font-black uppercase tracking-widest py-3 text-center text-[11px] transition-all flex items-center justify-center gap-1.5"
+                      className="flex-1 btn-ai py-3 text-center text-[11px] flex items-center justify-center gap-1.5 rounded-none rounded-bl-xl"
                     >
-                      <Zap className="w-3.5 h-3.5" fill="currentColor" />
-                      Buy Now
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Zap className="w-3.5 h-3.5" fill="currentColor" />
+                        Buy Now
+                      </span>
                     </button>
                     <Link
                       href={`/product/${product.id}`}
-                      className="w-16 bg-black/90 hover:bg-white hover:text-black text-white font-black uppercase tracking-widest py-3 text-center text-[10px] transition-all border-l border-white/10 flex items-center justify-center"
+                      className="w-14 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-white transition-all rounded-none rounded-br-xl"
+                      style={{ background: "rgba(0,0,0,0.7)", borderLeft: "1px solid rgba(168,85,247,0.2)" }}
                     >
                       View
                     </Link>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1 px-1">
+                <div className="px-1">
                   <Link href={`/product/${product.id}`}>
-                    <h3 className="font-bold uppercase tracking-wider truncate text-white hover:text-zinc-300 transition-colors">
+                    <h3 className="font-bold uppercase tracking-wide truncate text-white hover:text-purple-300 transition-colors text-sm">
                       {product.name}
                     </h3>
                   </Link>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-1">
                     <div className="flex items-baseline gap-1.5">
-                      <p className="text-[#e63329] font-black text-lg">৳{product.price.toFixed(0)}</p>
-                      <p className="text-zinc-600 font-bold text-sm line-through">৳999</p>
+                      <p className="font-black text-base gradient-text-purple-cyan">৳{product.price.toFixed(0)}</p>
+                      <p className="text-slate-600 font-bold text-xs line-through">৳999</p>
                     </div>
                     <button
-                      onClick={() =>
-                        setQuickBuyProduct({
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          imageUrl: product.imageUrl,
-                          sizes: product.sizes,
-                        })
-                      }
-                      className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-[#e63329] transition-colors flex items-center gap-1"
+                      onClick={() => setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes })}
+                      className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-purple-400 transition-colors flex items-center gap-1"
                     >
                       <Zap className="w-3 h-3" />
-                      Buy Now
+                      Buy
                     </button>
                   </div>
                 </div>
@@ -196,58 +246,95 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mt-16 text-center">
+        {/* View all */}
+        <div className="mt-14 text-center">
           <Link href="/products">
-            <Button
-              variant="outline"
-              size="lg"
-              className="font-black uppercase tracking-widest text-lg h-16 px-12 bg-transparent text-white border-2 border-[#1f1f1f] hover:border-white hover:bg-white hover:text-black transition-colors rounded-none gap-3"
+            <button
+              className="btn-ai-outline inline-flex items-center gap-3 h-14 px-10 rounded-xl text-sm"
             >
               View All Products
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </Link>
         </div>
       </section>
 
-      {/* Value Props */}
-      <section className="bg-black py-24 border-y border-[#1f1f1f]">
+      {/* ── FEATURES ─────────────────────────────────────────────── */}
+      <section className="py-24" style={{ borderTop: "1px solid rgba(168,85,247,0.1)", borderBottom: "1px solid rgba(168,85,247,0.1)", background: "rgba(255,255,255,0.01)" }}>
         <div className="container px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
-            <div className="flex flex-col items-start space-y-6">
-              <div className="h-16 w-16 bg-[#111] text-[#e63329] flex items-center justify-center rounded-none border border-[#1f1f1f]">
-                <Paintbrush className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="font-display text-2xl font-black uppercase tracking-wider mb-3 text-white">Raw Canvas</h3>
-                <p className="text-zinc-400 font-medium leading-relaxed">
-                  Upload any design. We print it with studio-grade quality on premium heavyweight cotton.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-start space-y-6">
-              <div className="h-16 w-16 bg-[#e63329] text-white flex items-center justify-center rounded-none">
-                <Layers className="h-8 w-8" />
-              </div>
-              <div>
-                <h3 className="font-display text-2xl font-black uppercase tracking-wider mb-3 text-white">Concrete Fit</h3>
-                <p className="text-zinc-400 font-medium leading-relaxed">
-                  Oversized, boxy, heavyweight. The authentic streetwear silhouette that matches your vibe.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-start space-y-6">
-              <div className="h-16 w-16 bg-[#111] text-[#e63329] flex items-center justify-center rounded-none border border-[#1f1f1f]">
-                <Zap className="h-8 w-8" fill="currentColor" />
-              </div>
-              <div>
-                <h3 className="font-display text-2xl font-black uppercase tracking-wider mb-3 text-white">One-Click Buy</h3>
-                <p className="text-zinc-400 font-medium leading-relaxed">
-                  Hit Buy Now on any product. Pick your size, go straight to checkout. No waiting.
-                </p>
-              </div>
-            </div>
+          <div className="text-center mb-14">
+            <p className="text-[11px] font-black uppercase tracking-widest mb-3" style={{ color: "#22d3ee" }}>Why Choose Us</p>
+            <h2 className="font-black text-4xl md:text-5xl uppercase tracking-tighter text-white">
+              Built <span className="gradient-text">Different</span>
+            </h2>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Sparkles className="h-6 w-6 text-white" />,
+                gradient: "linear-gradient(135deg, #a855f7, #7c3aed)",
+                glow: "rgba(168,85,247,0.3)",
+                title: "Raw Canvas",
+                desc: "Upload any design. Studio-grade printing on premium 300gsm heavyweight cotton.",
+              },
+              {
+                icon: <ShoppingBag className="h-6 w-6 text-white" />,
+                gradient: "linear-gradient(135deg, #22d3ee, #06b6d4)",
+                glow: "rgba(34,211,238,0.3)",
+                title: "Concrete Fit",
+                desc: "Oversized, boxy, heavyweight. The authentic streetwear silhouette you actually want.",
+              },
+              {
+                icon: <Zap className="h-6 w-6 text-white" fill="currentColor" />,
+                gradient: "linear-gradient(135deg, #f472b6, #ec4899)",
+                glow: "rgba(244,114,182,0.3)",
+                title: "One-Click Buy",
+                desc: "Hit Buy Now. Pick your size. Go straight to checkout. No waiting. No friction.",
+              },
+            ].map(({ icon, gradient, glow, title, desc }) => (
+              <div
+                key={title}
+                className="rounded-2xl p-8 transition-all duration-300 group hover:-translate-y-1"
+                style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(168,85,247,0.12)" }}
+              >
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110"
+                  style={{ background: gradient, boxShadow: `0 8px 25px ${glow}` }}
+                >
+                  {icon}
+                </div>
+                <h3 className="font-black text-xl uppercase tracking-wider text-white mb-3">{title}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ───────────────────────────────────────────── */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute inset-0"
+            style={{ background: "radial-gradient(ellipse at center, rgba(168,85,247,0.12) 0%, transparent 70%)" }}
+          />
+        </div>
+        <div className="container px-4 md:px-8 relative z-10 text-center">
+          <p className="text-[11px] font-black uppercase tracking-widest mb-4" style={{ color: "#a855f7" }}>Custom Design Studio</p>
+          <h2 className="font-black text-5xl md:text-7xl uppercase tracking-tighter mb-6 text-white">
+            Create <span className="gradient-text">Your Own</span>
+          </h2>
+          <p className="text-slate-400 max-w-md mx-auto text-base mb-10 leading-relaxed">
+            Upload your artwork. We print it on premium heavyweight tees. Your design. Your statement.
+          </p>
+          <Link href="/customize">
+            <button className="btn-ai inline-flex items-center gap-2.5 h-14 px-10 rounded-xl text-sm">
+              <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Sparkles className="w-4 h-4" />
+                Open Studio — Free
+              </span>
+            </button>
+          </Link>
         </div>
       </section>
 

@@ -1,37 +1,99 @@
 import { Link } from "wouter";
+import { Sparkles, Instagram, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t-2 border-[#1f1f1f] bg-[#0a0a0a] text-zinc-400">
-      <div className="container px-4 py-16 md:py-24 lg:px-8">
+    <footer
+      className="relative overflow-hidden"
+      style={{ borderTop: "1px solid rgba(168,85,247,0.15)", background: "#030309" }}
+    >
+      {/* Ambient glow */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-48 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse, rgba(168,85,247,0.08) 0%, transparent 70%)" }}
+      />
+
+      <div className="container px-4 py-16 md:py-20 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          {/* Brand */}
           <div className="md:col-span-2">
-            <h3 className="font-display text-4xl font-black uppercase tracking-tighter mb-6 text-white">ThreadCraft</h3>
-            <p className="font-bold uppercase tracking-wider text-sm max-w-md leading-relaxed">
-              Where self-expression meets concrete. A playground for people who want their clothes to say exactly what they mean. Built for the bold.
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #a855f7, #22d3ee)" }}>
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-black text-xl uppercase tracking-wider gradient-text-purple-cyan">Be Simple 75</span>
+            </div>
+            <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs">
+              Where self-expression meets the future. Premium streetwear built for those who wear their world differently.
             </p>
+            <div className="flex gap-3 mt-6">
+              <a
+                href="#"
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+                style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.2)" }}
+              >
+                <Instagram className="w-4 h-4 text-purple-400" />
+              </a>
+              <a
+                href="#"
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
+                style={{ background: "rgba(34,211,238,0.1)", border: "1px solid rgba(34,211,238,0.2)" }}
+              >
+                <Twitter className="w-4 h-4 text-cyan-400" />
+              </a>
+            </div>
           </div>
+
+          {/* Shop */}
           <div>
-            <h4 className="font-black mb-6 uppercase text-sm tracking-widest text-white">Shop Drops</h4>
-            <ul className="space-y-4 text-sm font-bold uppercase tracking-wider">
-              <li><Link href="/products" className="hover:text-[#e63329] transition-colors">All Products</Link></li>
-              <li><Link href="/customize" className="hover:text-[#e63329] transition-colors">The Studio</Link></li>
+            <h4 className="text-xs font-black mb-5 uppercase tracking-widest text-slate-400">Shop</h4>
+            <ul className="space-y-3 text-sm font-medium">
+              {[
+                { href: "/products", label: "All Products" },
+                { href: "/customize", label: "The Studio" },
+                { href: "/design-templates", label: "Templates" },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="text-slate-500 hover:text-white transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
+
+          {/* Support */}
           <div>
-            <h4 className="font-black mb-6 uppercase text-sm tracking-widest text-white">Support</h4>
-            <ul className="space-y-4 text-sm font-bold uppercase tracking-wider">
-              <li><a href="#" className="hover:text-[#e63329] transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-[#e63329] transition-colors">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-[#e63329] transition-colors">Contact</a></li>
+            <h4 className="text-xs font-black mb-5 uppercase tracking-widest text-slate-400">Support</h4>
+            <ul className="space-y-3 text-sm font-medium">
+              {[
+                { label: "FAQ" },
+                { label: "Shipping Info" },
+                { label: "Contact" },
+                { label: "Returns" },
+              ].map(({ label }) => (
+                <li key={label}>
+                  <a href="#" className="text-slate-500 hover:text-white transition-colors duration-200">
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
-        <div className="mt-16 pt-8 border-t-2 border-[#1f1f1f] text-xs font-black uppercase tracking-widest flex flex-col md:flex-row justify-between items-center gap-4 text-zinc-600">
-          <p>&copy; {new Date().getFullYear()} ThreadCraft. All Rights Reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Insta</a>
-            <a href="#" className="hover:text-white transition-colors">Tiktok</a>
+
+        {/* Bottom bar */}
+        <div
+          className="mt-14 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-slate-600"
+          style={{ borderTop: "1px solid rgba(168,85,247,0.1)" }}
+        >
+          <p>&copy; {new Date().getFullYear()} Be Simple 75. All Rights Reserved.</p>
+          <div className="flex items-center gap-1.5 text-slate-600">
+            <span className="w-1 h-1 rounded-full" style={{ background: "linear-gradient(#a855f7,#22d3ee)" }} />
+            <span>Built for the bold. Delivered to Bangladesh.</span>
           </div>
         </div>
       </div>
