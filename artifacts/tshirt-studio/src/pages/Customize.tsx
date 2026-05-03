@@ -82,10 +82,9 @@ function getDims(bodyType: BodyType, gender: Gender): Dims {
   return d;
 }
 
-const SKIN = "#d4a574";
-const PANTS = "#2a2a3e";
+const SKIN = "#b88a62"; // Slightly darker skin tone for dark vibe
+const PANTS = "#0f0f0f";
 
-// Design overlay plane shown on chest
 function DesignOverlay({
   dataUrl,
   torsoW,
@@ -214,17 +213,13 @@ function ModelFigure({
       </mesh>
 
       {/* Left hand */}
-      <mesh
-        position={[-(forearmX + 0.08), shoulderY - 0.7, 0]}
-      >
+      <mesh position={[-(forearmX + 0.08), shoulderY - 0.7, 0]}>
         <sphereGeometry args={[0.1, 10, 10]} />
         {skinMat}
       </mesh>
 
       {/* Right hand */}
-      <mesh
-        position={[forearmX + 0.08, shoulderY - 0.7, 0]}
-      >
+      <mesh position={[forearmX + 0.08, shoulderY - 0.7, 0]}>
         <sphereGeometry args={[0.1, 10, 10]} />
         {skinMat}
       </mesh>
@@ -250,13 +245,13 @@ function ModelFigure({
       {/* Left foot */}
       <mesh position={[-legX, legY - legLen / 2 - 0.07, 0.08]}>
         <boxGeometry args={[0.22, 0.13, 0.42]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.9} />
+        <meshStandardMaterial color="#050505" roughness={0.9} />
       </mesh>
 
       {/* Right foot */}
       <mesh position={[legX, legY - legLen / 2 - 0.07, 0.08]}>
         <boxGeometry args={[0.22, 0.13, 0.42]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.9} />
+        <meshStandardMaterial color="#050505" roughness={0.9} />
       </mesh>
     </group>
   );
@@ -275,10 +270,11 @@ function Scene({
 }) {
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[3, 6, 4]} intensity={1.6} castShadow />
-      <directionalLight position={[-3, 2, -2]} intensity={0.4} />
-      <Environment preset="studio" />
+      {/* Darker lighting setup for the streetwear vibe */}
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[3, 6, 4]} intensity={1.8} castShadow />
+      <directionalLight position={[-3, 2, -2]} intensity={0.8} />
+      <Environment preset="city" />
       <ModelFigure
         bodyType={bodyType}
         gender={gender}
@@ -287,10 +283,11 @@ function Scene({
       />
       <ContactShadows
         position={[0, -0.38, 0]}
-        opacity={0.35}
-        scale={4}
-        blur={1.5}
+        opacity={0.6}
+        scale={6}
+        blur={2}
         far={4}
+        color="#000"
       />
       <OrbitControls
         enablePan={false}
@@ -304,15 +301,6 @@ function Scene({
   );
 }
 
-const COLOR_OPTIONS = [
-  { name: "Black", hex: "#111111" },
-  { name: "White", hex: "#f5f5f5" },
-  { name: "Gray", hex: "#888888" },
-  { name: "Navy", hex: "#1a2b4a" },
-  { name: "Olive", hex: "#4a5240" },
-  { name: "Burgundy", hex: "#6b1f1f" },
-];
-
 export default function Customize() {
   const [, setLocation] = useLocation();
   const { data: products } = useListProducts();
@@ -321,10 +309,9 @@ export default function Customize() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [bodyType, setBodyType] = useState<BodyType>("medium");
+  const [bodyType, setBodyType] = useState<BodyType>("oversized");
   const [gender, setGender] = useState<Gender>("man");
-  const [shirtColor, setShirtColor] = useState(COLOR_OPTIONS[0]);
-  const [size, setSize] = useState("M");
+  const [size, setSize] = useState("XL");
   const [quantity, setQuantity] = useState(1);
   const [designDataUrl, setDesignDataUrl] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
@@ -357,7 +344,7 @@ export default function Customize() {
           data: { imageData: base64, filename: file.name },
         });
         setUploadedUrl(result.url);
-        toast({ title: "Design applied", description: "Looking good on the model." });
+        toast({ title: "Design Applied", description: "Ready to drop." });
       } catch {
         toast({
           title: "Upload failed",
@@ -384,7 +371,7 @@ export default function Customize() {
         data: {
           productId: customProduct.id,
           size,
-          color: shirtColor.name,
+          color: "Black",
           quantity,
           customDesignUrl: uploadedUrl ?? null,
         },
@@ -392,7 +379,7 @@ export default function Customize() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
-          toast({ title: "Added to Bag", description: "Your custom tee is in the bag." });
+          toast({ title: "Added to Bag", description: "Your custom piece is in the bag." });
           setLocation("/cart");
         },
         onError: () => {
@@ -403,54 +390,60 @@ export default function Customize() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="container px-4 py-8 md:py-12">
-        <div className="text-center mb-10">
-          <h1 className="font-display text-4xl md:text-6xl font-black uppercase tracking-tighter">
+    <div className="min-h-screen bg-[#0a0a0a] text-[#f0f0f0] pb-24">
+      <div className="container px-4 py-12 md:py-16">
+        <div className="text-center mb-12">
+          <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">
             The Studio
           </h1>
-          <p className="text-muted-foreground max-w-xl mx-auto mt-3">
-            Upload your design. Choose your fit. Rotate the model. Make it yours.
+          <p className="text-zinc-400 font-bold uppercase tracking-widest max-w-xl mx-auto mt-4 text-sm">
+            Upload your vision. Choose your fit. Make it concrete.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* 3D Canvas */}
-          <div className="lg:col-span-7 xl:col-span-8 bg-gradient-to-b from-zinc-200 to-zinc-100 rounded-2xl overflow-hidden relative"
-            style={{ height: "680px" }}>
+          <div className="lg:col-span-7 xl:col-span-8 bg-[#111] border-2 border-[#1f1f1f] rounded-none overflow-hidden relative"
+            style={{ height: "720px" }}>
 
-            <div className="absolute top-4 left-4 z-10 flex gap-2">
-              <span className="bg-black/80 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                Drag to rotate
+            {!designDataUrl && (
+              <div className="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-center mix-blend-screen z-0">
+                <img src="/products/angel-back.jpg" alt="Ghost" className="w-[150%] h-[150%] object-cover object-center grayscale blur-[2px]" />
+              </div>
+            )}
+
+            <div className="absolute top-6 left-6 z-10 flex gap-3">
+              <span className="bg-black/90 border border-[#1f1f1f] text-white text-[10px] font-black px-4 py-2 uppercase tracking-widest backdrop-blur-sm">
+                Drag to Rotate
               </span>
               {designDataUrl && (
-                <span className="bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Design on
+                <span className="bg-[#e63329] text-white text-[10px] font-black px-4 py-2 uppercase tracking-widest">
+                  Design Applied
                 </span>
               )}
             </div>
 
             <WebGLErrorBoundary
               fallback={
-                <div className="flex flex-col items-center justify-center h-full text-center px-8">
-                  <p className="font-black uppercase text-lg mb-2">3D Preview Unavailable</p>
-                  <p className="text-sm text-muted-foreground">
-                    Your browser or environment does not support WebGL.<br />
-                    Try opening this page in a modern browser for the full 3D experience.
+                <div className="flex flex-col items-center justify-center h-full text-center px-8 bg-[#050505] relative z-10">
+                  <p className="font-black uppercase text-xl mb-3 text-white">3D Preview Offline</p>
+                  <p className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                    WebGL support required.
                   </p>
                 </div>
               }
             >
               <Canvas
                 camera={{ position: [0, 1.8, 5], fov: 38 }}
-                gl={{ antialias: true }}
+                gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}
                 shadows
+                className="relative z-10"
               >
                 <Suspense fallback={null}>
                   <Scene
                     bodyType={bodyType}
                     gender={gender}
-                    shirtHex={shirtColor.hex}
+                    shirtHex="#0d0d0d" // Always dark/black
                     designDataUrl={designDataUrl}
                   />
                 </Suspense>
@@ -458,49 +451,52 @@ export default function Customize() {
             </WebGLErrorBoundary>
 
             {isUploading && (
-              <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-20">
-                <div className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 shadow-xl">
-                  <Loader2 className="w-5 h-5 animate-spin text-orange-600" />
-                  <span className="font-bold text-sm uppercase tracking-wider">Applying design...</span>
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20">
+                <div className="bg-[#111] border border-[#1f1f1f] px-8 py-6 flex flex-col items-center gap-4">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#e63329]" />
+                  <span className="font-black text-xs uppercase tracking-widest text-white">Processing Artwork...</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Controls */}
-          <div className="lg:col-span-5 xl:col-span-4 space-y-5">
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6">
 
             {/* Upload */}
-            <div className="bg-white border rounded-xl p-5">
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4">Your Artwork</h3>
+            <div className="bg-[#050505] border-2 border-[#1f1f1f] p-6">
+              <h3 className="font-display text-xl font-black uppercase tracking-wider mb-6 text-white border-b-2 border-[#1f1f1f] pb-3">Artwork</h3>
               {designDataUrl ? (
-                <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-lg border">
+                <div className="flex items-center gap-4 p-4 bg-[#111] border border-[#1f1f1f]">
                   <img
                     src={designDataUrl}
                     alt="Design preview"
-                    className="w-14 h-14 object-contain rounded bg-white border"
+                    className="w-16 h-16 object-contain bg-black border border-[#1f1f1f]"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate">Custom Design</p>
-                    <p className="text-xs text-muted-foreground">Showing on model</p>
+                    <p className="font-black text-sm uppercase tracking-wide text-white truncate">Custom Print</p>
+                    <p className="text-xs font-bold tracking-wider uppercase text-[#e63329] mt-1">Live on Model</p>
                   </div>
                   <button
                     onClick={handleClearDesign}
-                    className="text-zinc-400 hover:text-red-500 transition-colors p-1"
+                    className="text-zinc-500 hover:text-[#e63329] transition-colors p-2"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               ) : (
                 <div
-                  className="border-2 border-dashed border-zinc-200 rounded-xl p-7 flex flex-col items-center text-center hover:border-orange-400 hover:bg-orange-50/50 transition-all cursor-pointer group"
+                  className="border-2 border-dashed border-[#1f1f1f] p-8 flex flex-col items-center text-center hover:border-white transition-all cursor-pointer group relative overflow-hidden bg-[#0a0a0a]"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                    <Upload className="w-5 h-5" />
+                  <div className="absolute inset-0 opacity-10 grayscale mix-blend-screen pointer-events-none transition-opacity group-hover:opacity-20">
+                    <img src="/products/deadly-back.jpg" className="w-full h-full object-cover object-center" alt="" />
                   </div>
-                  <p className="font-bold text-sm">Click to upload design</p>
-                  <p className="text-xs text-muted-foreground mt-1">PNG or JPG, up to 5MB</p>
+                  <div className="relative z-10 w-16 h-16 bg-[#111] border border-[#1f1f1f] text-white flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-white group-hover:text-black transition-all">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <p className="font-black uppercase tracking-widest text-sm text-white relative z-10">Upload Graphic</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mt-2 relative z-10">PNG / JPG (Max 5MB)</p>
                 </div>
               )}
               <input
@@ -512,18 +508,19 @@ export default function Customize() {
               />
             </div>
 
-            {/* Gender */}
-            <div className="bg-white border rounded-xl p-5">
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4">Model</h3>
-              <div className="grid grid-cols-2 gap-2 mb-4">
+            {/* Model & Fit */}
+            <div className="bg-[#050505] border-2 border-[#1f1f1f] p-6">
+              <h3 className="font-display text-xl font-black uppercase tracking-wider mb-6 text-white border-b-2 border-[#1f1f1f] pb-3">Silhouette</h3>
+              
+              <div className="grid grid-cols-2 gap-3 mb-6">
                 {(["man", "woman"] as Gender[]).map((g) => (
                   <button
                     key={g}
                     onClick={() => setGender(g)}
-                    className={`h-11 border-2 rounded-lg font-bold uppercase text-sm transition-all ${
+                    className={`h-12 border-2 font-black uppercase tracking-widest text-xs transition-all ${
                       gender === g
-                        ? "border-orange-500 bg-orange-500 text-white"
-                        : "border-zinc-200 hover:border-zinc-400"
+                        ? "border-white bg-white text-black"
+                        : "border-[#1f1f1f] text-zinc-400 hover:border-zinc-500 hover:text-white"
                     }`}
                   >
                     {g}
@@ -531,16 +528,15 @@ export default function Customize() {
                 ))}
               </div>
 
-              <h3 className="font-black uppercase tracking-wider text-sm mb-3">Fit</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 {(["slim", "medium", "oversized"] as BodyType[]).map((type) => (
                   <button
                     key={type}
                     onClick={() => setBodyType(type)}
-                    className={`h-11 border-2 rounded-lg font-bold uppercase text-xs transition-all ${
+                    className={`h-12 border-2 font-black uppercase tracking-widest text-[10px] transition-all ${
                       bodyType === type
-                        ? "border-orange-500 bg-orange-500 text-white"
-                        : "border-zinc-200 hover:border-zinc-400"
+                        ? "border-white bg-white text-black"
+                        : "border-[#1f1f1f] text-zinc-400 hover:border-zinc-500 hover:text-white"
                     }`}
                   >
                     {type}
@@ -549,40 +545,20 @@ export default function Customize() {
               </div>
             </div>
 
-            {/* Color */}
-            <div className="bg-white border rounded-xl p-5">
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4">
-                Color — {shirtColor.name}
-              </h3>
-              <div className="flex gap-3 flex-wrap">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={() => setShirtColor(c)}
-                    title={c.name}
-                    className={`w-9 h-9 rounded-full transition-all border-2 ${
-                      shirtColor.name === c.name
-                        ? "border-orange-500 scale-110 shadow-md"
-                        : "border-transparent hover:scale-105 shadow-sm"
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Size + Qty */}
-            <div className="bg-white border rounded-xl p-5">
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4">Size</h3>
-              <div className="grid grid-cols-5 gap-2 mb-5">
-                {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
+            {/* Size & Qty */}
+            <div className="bg-[#050505] border-2 border-[#1f1f1f] p-6">
+              <h3 className="font-display text-xl font-black uppercase tracking-wider mb-6 text-white border-b-2 border-[#1f1f1f] pb-3">Details</h3>
+              
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">Size</p>
+              <div className="grid grid-cols-5 gap-2 mb-8">
+                {["S", "M", "L", "XL", "XXL"].map((s) => (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`h-10 border-2 rounded-lg font-bold text-xs transition-all ${
+                    className={`h-12 border-2 font-black text-sm transition-all ${
                       size === s
-                        ? "border-orange-500 bg-orange-500 text-white"
-                        : "border-zinc-200 hover:border-zinc-400"
+                        ? "border-white bg-white text-black"
+                        : "border-[#1f1f1f] text-zinc-400 hover:border-zinc-500 hover:text-white"
                     }`}
                   >
                     {s}
@@ -590,18 +566,18 @@ export default function Customize() {
                 ))}
               </div>
 
-              <h3 className="font-black uppercase tracking-wider text-sm mb-3">Quantity</h3>
-              <div className="flex items-center gap-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">Quantity</p>
+              <div className="flex items-center border-2 border-[#1f1f1f] w-full h-14 bg-[#111]">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 border-2 border-zinc-200 rounded-lg font-bold text-lg hover:border-zinc-400 transition-all"
+                  className="w-16 h-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors hover:bg-[#1f1f1f]"
                 >
                   -
                 </button>
-                <span className="font-black text-xl w-8 text-center">{quantity}</span>
+                <span className="flex-1 text-center font-black text-xl text-white">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 border-2 border-zinc-200 rounded-lg font-bold text-lg hover:border-zinc-400 transition-all"
+                  className="w-16 h-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors hover:bg-[#1f1f1f]"
                 >
                   +
                 </button>
@@ -610,12 +586,12 @@ export default function Customize() {
 
             <Button
               size="lg"
-              className="w-full h-14 font-black uppercase tracking-widest text-base bg-orange-600 hover:bg-orange-700 text-white rounded-xl"
+              className="w-full h-16 font-black uppercase tracking-widest text-lg bg-[#e63329] hover:bg-white hover:text-black text-white transition-colors border-2 border-transparent rounded-none shadow-[0_0_30px_rgba(230,51,41,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
               onClick={handleAddToCart}
               disabled={!customProduct || addCartItem.isPending}
             >
               {addCartItem.isPending
-                ? "Adding..."
+                ? "Processing..."
                 : `Add to Bag — $${((customProduct?.price ?? 49.99) * quantity).toFixed(2)}`}
             </Button>
           </div>

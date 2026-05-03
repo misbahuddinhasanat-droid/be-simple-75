@@ -49,7 +49,7 @@ export default function Checkout() {
   });
 
   if (isCartLoading) {
-    return <div className="container py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+    return <div className="bg-[#0a0a0a] min-h-screen py-32 flex justify-center"><Loader2 className="w-12 h-12 animate-spin text-[#e63329]" /></div>;
   }
 
   if (!cart || cart.items.length === 0) {
@@ -88,163 +88,165 @@ export default function Checkout() {
   };
 
   return (
-    <div className="container px-4 py-12 max-w-6xl mx-auto">
-      <Link href="/cart" className="text-sm font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground mb-8 inline-block">
-        ← Back to Bag
-      </Link>
-      
-      <h1 className="font-display text-4xl font-black uppercase tracking-tighter mb-10 border-b pb-4">Checkout</h1>
+    <div className="bg-[#0a0a0a] min-h-screen text-[#f0f0f0] pb-24">
+      <div className="container px-4 py-16 max-w-6xl mx-auto">
+        <Link href="/cart" className="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white mb-8 inline-block transition-colors">
+          ← Back to Bag
+        </Link>
+        
+        <h1 className="font-display text-5xl md:text-6xl font-black uppercase tracking-tighter mb-12 border-b-2 border-[#1f1f1f] pb-6 text-white">Secure Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-7">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="bg-card border p-6 rounded-lg space-y-6">
-                <h2 className="font-display text-xl font-bold uppercase tracking-wide">Contact Info</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="customerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase text-xs font-bold tracking-wider">Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} className="h-12 bg-background" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase text-xs font-bold tracking-wider">Email Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="john@example.com" type="email" {...field} className="h-12 bg-background" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="bg-card border p-6 rounded-lg space-y-6">
-                <h2 className="font-display text-xl font-bold uppercase tracking-wide">Shipping Address</h2>
-                
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase text-xs font-bold tracking-wider">Street Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123 Main St, Apt 4B" {...field} className="h-12 bg-background" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase text-xs font-bold tracking-wider">City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="New York" {...field} className="h-12 bg-background" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase text-xs font-bold tracking-wider">Country</FormLabel>
-                        <FormControl>
-                          <Input placeholder="United States" {...field} className="h-12 bg-background" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase text-xs font-bold tracking-wider">Zip / Postal</FormLabel>
-                        <FormControl>
-                          <Input placeholder="10001" {...field} className="h-12 bg-background" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                size="lg" 
-                className="w-full h-16 font-bold uppercase tracking-widest text-lg"
-                disabled={createOrder.isPending}
-              >
-                {createOrder.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                {createOrder.isPending ? "Processing..." : `Place Order - $${cart.total.toFixed(2)}`}
-              </Button>
-            </form>
-          </Form>
-        </div>
-
-        <div className="lg:col-span-5">
-          <div className="bg-zinc-100 dark:bg-zinc-900 rounded-lg p-6 sticky top-24">
-            <h2 className="font-display text-xl font-bold uppercase tracking-wide mb-6">Order Items</h2>
-            
-            <div className="space-y-4 mb-6">
-              {cart.items.map((item) => (
-                <div key={item.itemId} className="flex gap-4 py-2">
-                  <div className="w-16 h-20 bg-muted rounded overflow-hidden shrink-0 relative">
-                    <img src={item.productImageUrl} alt={item.productName} className="w-full h-full object-cover" />
-                    {item.customDesignUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center p-1 mt-2">
-                        <img src={item.customDesignUrl} alt="Custom" className="w-1/2 object-contain" />
-                      </div>
-                    )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          <div className="lg:col-span-7">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="bg-[#050505] border-2 border-[#1f1f1f] p-8 space-y-8">
+                  <h2 className="font-display text-2xl font-black uppercase tracking-wider text-white border-b-2 border-[#1f1f1f] pb-3">Contact</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="customerName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                          </FormControl>
+                          <FormMessage className="text-[#e63329]" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">Email Address</FormLabel>
+                          <FormControl>
+                            <Input placeholder="john@example.com" type="email" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                          </FormControl>
+                          <FormMessage className="text-[#e63329]" />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                  <div className="flex-1 text-sm">
-                    <h4 className="font-bold uppercase leading-tight truncate">{item.productName}</h4>
-                    <p className="text-muted-foreground mt-1">{item.color} / {item.size}</p>
-                    <div className="flex justify-between mt-2">
-                      <span>Qty: {item.quantity}</span>
-                      <span className="font-bold">${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+
+                <div className="bg-[#050505] border-2 border-[#1f1f1f] p-8 space-y-8">
+                  <h2 className="font-display text-2xl font-black uppercase tracking-wider text-white border-b-2 border-[#1f1f1f] pb-3">Shipping</h2>
+                  
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">Street Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="123 Main St, Apt 4B" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                        </FormControl>
+                        <FormMessage className="text-[#e63329]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">City</FormLabel>
+                          <FormControl>
+                            <Input placeholder="New York" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                          </FormControl>
+                          <FormMessage className="text-[#e63329]" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">Country</FormLabel>
+                          <FormControl>
+                            <Input placeholder="United States" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                          </FormControl>
+                          <FormMessage className="text-[#e63329]" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="zipCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="uppercase text-[10px] font-black tracking-widest text-zinc-400">Zip / Postal</FormLabel>
+                          <FormControl>
+                            <Input placeholder="10001" {...field} className="h-14 bg-[#111] border-[#1f1f1f] rounded-none focus-visible:ring-white text-white font-medium" />
+                          </FormControl>
+                          <FormMessage className="text-[#e63329]" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full h-16 font-black uppercase tracking-widest text-xl bg-[#e63329] hover:bg-white hover:text-black text-white transition-colors rounded-none border-2 border-transparent"
+                  disabled={createOrder.isPending}
+                >
+                  {createOrder.isPending ? <Loader2 className="w-6 h-6 animate-spin mr-3" /> : null}
+                  {createOrder.isPending ? "Processing..." : `Place Order — $${cart.total.toFixed(2)}`}
+                </Button>
+              </form>
+            </Form>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="bg-[#050505] border-2 border-[#1f1f1f] p-8 sticky top-28">
+              <h2 className="font-display text-2xl font-black uppercase tracking-wider mb-8 text-white border-b-2 border-[#1f1f1f] pb-3">Your Drop</h2>
+              
+              <div className="space-y-6 mb-8">
+                {cart.items.map((item) => (
+                  <div key={item.itemId} className="flex gap-4 py-2 border-b border-[#1f1f1f]/50 pb-6">
+                    <div className="w-20 aspect-[4/5] bg-[#111] border border-[#1f1f1f] overflow-hidden shrink-0 relative">
+                      <img src={item.productImageUrl} alt={item.productName} className="w-full h-full object-cover object-top" />
+                      {item.customDesignUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center p-1 mt-2 bg-black/40">
+                          <img src={item.customDesignUrl} alt="Custom" className="w-2/3 object-contain" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <h4 className="font-black uppercase tracking-wide text-white leading-tight mb-1">{item.productName}</h4>
+                      <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Black / {item.size}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-zinc-400">QTY: {item.quantity}</span>
+                        <span className="font-black text-[#e63329]">${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="border-t border-border/50 pt-4 space-y-2 text-sm mb-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>${cart.total.toFixed(2)}</span>
+              <div className="space-y-4 text-sm mb-6 font-bold uppercase tracking-wider border-b-2 border-[#1f1f1f] pb-6">
+                <div className="flex justify-between text-zinc-400">
+                  <span>Subtotal</span>
+                  <span className="text-white">${cart.total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-zinc-400">
+                  <span>Shipping</span>
+                  <span className="text-[#e63329]">Free</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="text-primary font-bold">Free</span>
+              
+              <div className="flex justify-between items-end">
+                <span className="font-black uppercase tracking-widest text-zinc-400">Total</span>
+                <span className="font-display text-4xl font-black text-white">${cart.total.toFixed(2)}</span>
               </div>
-            </div>
-            
-            <div className="border-t border-border/50 pt-4 flex justify-between items-end">
-              <span className="font-bold uppercase">Total</span>
-              <span className="font-display text-2xl font-black">${cart.total.toFixed(2)}</span>
             </div>
           </div>
         </div>
