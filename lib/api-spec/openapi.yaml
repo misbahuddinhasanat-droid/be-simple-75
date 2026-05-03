@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Custom T-Shirt Studio API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: T-shirt product operations
+  - name: cart
+    description: Shopping cart operations
+  - name: orders
+    description: Order operations
+  - name: upload
+    description: Image upload operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,184 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/featured:
+    get:
+      operationId: getFeaturedProducts
+      tags: [products]
+      summary: Get featured products
+      responses:
+        "200":
+          description: Featured products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      summary: Get current cart
+      responses:
+        "200":
+          description: Cart contents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items:
+    post:
+      operationId: addCartItem
+      tags: [cart]
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemBody"
+      responses:
+        "201":
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items/{itemId}:
+    delete:
+      operationId: removeCartItem
+      tags: [cart]
+      summary: Remove item from cart
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cart after removal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/clear:
+    post:
+      operationId: clearCart
+      tags: [cart]
+      summary: Clear the cart
+      responses:
+        "200":
+          description: Empty cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /upload/design:
+    post:
+      operationId: uploadDesign
+      tags: [upload]
+      summary: Upload a custom design image (base64)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadDesignBody"
+      responses:
+        "200":
+          description: Upload successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +220,200 @@ components:
       required:
         - status
 
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        imageUrl:
+          type: string
+        category:
+          type: string
+        sizes:
+          type: array
+          items:
+            type: string
+        colors:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        stock:
+          type: integer
+      required:
+        - id
+        - name
+        - description
+        - price
+        - imageUrl
+        - category
+        - sizes
+        - colors
+        - featured
+        - stock
+
+    CartItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+        productId:
+          type: integer
+        productName:
+          type: string
+        productImageUrl:
+          type: string
+        size:
+          type: string
+        color:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+        customDesignUrl:
+          type: string
+          nullable: true
+      required:
+        - itemId
+        - productId
+        - productName
+        - productImageUrl
+        - size
+        - color
+        - quantity
+        - price
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        total:
+          type: number
+        itemCount:
+          type: integer
+      required:
+        - items
+        - total
+        - itemCount
+
+    AddCartItemBody:
+      type: object
+      properties:
+        productId:
+          type: integer
+        size:
+          type: string
+        color:
+          type: string
+        quantity:
+          type: integer
+        customDesignUrl:
+          type: string
+          nullable: true
+      required:
+        - productId
+        - size
+        - color
+        - quantity
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        zipCode:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AddCartItemBody"
+      required:
+        - customerName
+        - email
+        - address
+        - city
+        - country
+        - zipCode
+        - items
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerName:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        zipCode:
+          type: string
+        status:
+          type: string
+        total:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        createdAt:
+          type: string
+      required:
+        - id
+        - customerName
+        - email
+        - address
+        - city
+        - country
+        - zipCode
+        - status
+        - total
+        - items
+        - createdAt
+
+    UploadDesignBody:
+      type: object
+      properties:
+        imageData:
+          type: string
+          description: Base64 encoded image data (with data URI prefix)
+        filename:
+          type: string
+      required:
+        - imageData
+        - filename
+
+    UploadResult:
+      type: object
+      properties:
+        url:
+          type: string
+        filename:
+          type: string
+      required:
+        - url
+        - filename
