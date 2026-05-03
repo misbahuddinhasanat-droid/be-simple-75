@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://besimple75.com/sitemap.xml
+
+# Be Simple 75 — Premium Streetwear Bangladesh

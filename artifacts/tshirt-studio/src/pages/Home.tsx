@@ -4,6 +4,7 @@ import { useGetFeaturedProducts, useListProducts } from "@workspace/api-client-r
 import { ArrowRight, Paintbrush, Zap, Layers } from "lucide-react";
 import { useState } from "react";
 import { QuickBuyModal } from "@/components/QuickBuyModal";
+import { useSEO } from "@/hooks/useSEO";
 
 interface ProductForModal {
   id: number;
@@ -14,6 +15,11 @@ interface ProductForModal {
 }
 
 export default function Home() {
+  useSEO({
+    title: "Premium Streetwear Bangladesh",
+    description: "Be Simple 75 — premium streetwear t-shirts in Bangladesh. Anime, graphic & oversized tees from ৳599. Fast delivery to Dhaka, Chittagong, Sylhet & all BD.",
+    path: "/",
+  });
   const { data: featuredProducts, isLoading: isLoadingFeatured } = useGetFeaturedProducts();
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [quickBuyProduct, setQuickBuyProduct] = useState<ProductForModal | null>(null);

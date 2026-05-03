@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Paintbrush, Minus, Plus, Zap, ShoppingBag } from "lucide-react";
 import { useBuyNow } from "@/hooks/useBuyNow";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -19,6 +20,21 @@ export default function ProductDetail() {
   const { buyNow, isPending: isBuyingNow } = useBuyNow();
 
   const [selectedSize, setSelectedSize] = useState<string>("");
+
+  useSEO(product ? {
+    title: `${product.name} — ৳${product.price.toFixed(0)} Streetwear Tee`,
+    description: `${product.name} — premium streetwear t-shirt from Be Simple 75. Only ৳${product.price.toFixed(0)} (was ৳999). ${product.description?.slice(0, 80) ?? ""}. Sizes: ${product.sizes?.join(", ")}. Fast delivery all over Bangladesh.`,
+    keywords: `${product.name}, ${product.category} tshirt bangladesh, streetwear tee bd, buy ${product.name} online`,
+    image: product.imageUrl?.startsWith("http") ? product.imageUrl : product.imageUrl,
+    path: `/product/${id}`,
+    type: "product",
+    product: {
+      name: product.name,
+      image: product.imageUrl,
+      description: product.description ?? "",
+      price: product.price,
+    },
+  } : { title: "Product", path: `/product/${id}` });
   const [quantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
 

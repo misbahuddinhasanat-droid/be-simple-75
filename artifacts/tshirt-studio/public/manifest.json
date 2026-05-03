@@ -1,0 +1,20 @@
+{
+  "name": "Be Simple 75 — Streetwear Bangladesh",
+  "short_name": "Be Simple 75",
+  "description": "Premium streetwear t-shirts in Bangladesh. Anime, graphic & oversized tees from ৳599.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "lang": "bn-BD",
+  "orientation": "portrait",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

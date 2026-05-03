@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Home Page -->
+  <url>
+    <loc>https://besimple75.com/</loc>
+    <xhtml:link rel="alternate" hreflang="bn-BD" href="https://besimple75.com/"/>
+    <xhtml:link rel="alternate" hreflang="en-BD" href="https://besimple75.com/"/>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- All Products -->
+  <url>
+    <loc>https://besimple75.com/products</loc>
+    <xhtml:link rel="alternate" hreflang="bn-BD" href="https://besimple75.com/products"/>
+    <xhtml:link rel="alternate" hreflang="en-BD" href="https://besimple75.com/products"/>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Custom Design -->
+  <url>
+    <loc>https://besimple75.com/customize</loc>
+    <xhtml:link rel="alternate" hreflang="bn-BD" href="https://besimple75.com/customize"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Design Templates -->
+  <url>
+    <loc>https://besimple75.com/design-templates</loc>
+    <xhtml:link rel="alternate" hreflang="bn-BD" href="https://besimple75.com/design-templates"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Cart -->
+  <url>
+    <loc>https://besimple75.com/cart</loc>
+    <changefreq>never</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Checkout -->
+  <url>
+    <loc>https://besimple75.com/checkout</loc>
+    <changefreq>never</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

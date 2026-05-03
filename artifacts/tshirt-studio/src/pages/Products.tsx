@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { QuickBuyModal } from "@/components/QuickBuyModal";
+import { useSEO } from "@/hooks/useSEO";
 
 interface ProductForModal {
   id: number;
@@ -14,6 +15,12 @@ interface ProductForModal {
 }
 
 export default function Products() {
+  useSEO({
+    title: "All Streetwear — The Collection",
+    description: "Browse all Be Simple 75 streetwear tees. Anime, music, gaming & street graphic t-shirts. All from ৳599 with delivery across Bangladesh.",
+    keywords: "streetwear collection bangladesh, anime tshirt shop, graphic tee dhaka, buy tshirt online bd",
+    path: "/products",
+  });
   const [category, setCategory] = useState<string | undefined>();
   const { data: products, isLoading } = useListProducts(
     category && category !== "All" ? { category } : undefined
