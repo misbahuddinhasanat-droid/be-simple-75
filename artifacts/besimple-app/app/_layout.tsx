@@ -15,6 +15,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import { CartProvider } from "@/context/CartContext";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
@@ -32,6 +33,7 @@ function RootLayoutNav() {
       <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="checkout" options={{ headerShown: false }} />
       <Stack.Screen name="order-success" options={{ headerShown: false, gestureEnabled: false }} />
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -56,13 +58,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <CartProvider>
-            <GestureHandlerRootView>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </CartProvider>
+          <AdminAuthProvider>
+            <CartProvider>
+              <GestureHandlerRootView>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </CartProvider>
+          </AdminAuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

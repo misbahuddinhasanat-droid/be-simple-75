@@ -8,8 +8,10 @@ import {
   Text,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAdminAuth } from "@/context/AdminAuthContext";
 import { useColors } from "@/hooks/useColors";
 
 const LINKS = [
@@ -48,6 +50,8 @@ const POLICIES = [
 export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { isAdmin } = useAdminAuth();
+  const router = useRouter();
 
   return (
     <ScrollView
@@ -124,6 +128,36 @@ export default function ProfileScreen() {
             </View>
           </View>
         ))}
+      </View>
+
+      <View style={[styles.section, { paddingTop: 0 }]}>
+        <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
+          ADMIN
+        </Text>
+        <Pressable
+          onPress={() => router.push(isAdmin ? "/admin/" : "/admin/login")}
+          style={({ pressed }) => [
+            styles.adminBtn,
+            {
+              backgroundColor: colors.primary + "18",
+              borderColor: colors.primary + "44",
+              opacity: pressed ? 0.75 : 1,
+            },
+          ]}
+        >
+          <View style={[styles.adminIcon, { backgroundColor: colors.primary + "22" }]}>
+            <Feather name="shield" size={20} color={colors.primary} />
+          </View>
+          <View style={styles.linkInfo}>
+            <Text style={[styles.linkLabel, { color: colors.primary }]}>
+              {isAdmin ? "Admin Dashboard" : "Admin Panel"}
+            </Text>
+            <Text style={[styles.linkSub, { color: colors.mutedForeground }]}>
+              {isAdmin ? "Manage orders & products" : "Sign in to manage store"}
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={16} color={colors.primary} />
+        </Pressable>
       </View>
 
       <Text style={[styles.footer, { color: colors.mutedForeground }]}>
@@ -224,5 +258,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     paddingVertical: 24,
+  },
+  adminBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  adminIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
