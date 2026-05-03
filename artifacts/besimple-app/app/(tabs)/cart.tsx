@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCart } from "@/context/CartContext";
 import { useColors } from "@/hooks/useColors";
+import { getImageUrl } from "@/utils/imageUrl";
 
 export default function CartScreen() {
   const colors = useColors();
@@ -77,7 +78,7 @@ export default function CartScreen() {
                 ]}
               >
                 <Image
-                  source={{ uri: item.productImageUrl }}
+                  source={{ uri: getImageUrl(item.productImageUrl) }}
                   style={styles.itemImage}
                   contentFit="cover"
                 />

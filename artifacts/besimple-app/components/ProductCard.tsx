@@ -6,6 +6,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
+import { getImageUrl } from "@/utils/imageUrl";
 
 interface Props {
   id: number;
@@ -40,7 +41,7 @@ export function ProductCard({ id, name, price, imageUrl, category, onAddToCart }
     >
       <View style={styles.imageWrap}>
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: getImageUrl(imageUrl) }}
           style={styles.image}
           contentFit="cover"
           transition={200}

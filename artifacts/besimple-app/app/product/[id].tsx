@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCart } from "@/context/CartContext";
 import { useColors } from "@/hooks/useColors";
+import { getImageUrl } from "@/utils/imageUrl";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -95,7 +96,7 @@ export default function ProductDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Image
-          source={{ uri: product.imageUrl }}
+          source={{ uri: getImageUrl(product.imageUrl) }}
           style={styles.image}
           contentFit="cover"
           transition={300}
