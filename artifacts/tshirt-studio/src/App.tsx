@@ -56,6 +56,9 @@ function Router() {
       <Route path="/admin/settings">
         <AdminGuard><AdminSettings /></AdminGuard>
       </Route>
+      <Route path="/admin/dashboard">
+        <AdminGuard><AdminDashboard /></AdminGuard>
+      </Route>
       <Route path="/admin">
         <AdminGuard><AdminDashboard /></AdminGuard>
       </Route>

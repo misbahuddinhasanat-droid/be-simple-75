@@ -1,220 +1,229 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Save, Check, Eye, EyeOff, ExternalLink, Tag, Package, Truck, CreditCard, Zap } from "lucide-react";
+import { Save, Check, Eye, EyeOff, Zap, Tag, Truck, CreditCard, Bell, BarChart3, ExternalLink } from "lucide-react";
 
 const ADMIN_KEY = "besimple2024";
 
 interface Settings {
-  gtmId: string; pixelId: string; bdcourierApiKey: string;
-  pathaoClientId: string; pathaoClientSecret: string;
-  steadfastApiKey: string; steadfastSecretKey: string;
-  uddoktapayApiKey: string; uddoktapayApiSecret: string;
+  gtmId: string; pixelId: string; tiktokPixelId: string; ga4MeasurementId: string;
+  bdcourierApiKey: string; pathaoClientId: string; pathaoClientSecret: string;
+  steadfastApiKey: string; steadfastSecretKey: string; oneclickApiKey: string;
+  uddoktapayApiKey: string; uddoktapayApiSecret: string; sslcommerzStoreId: string; sslcommerzPassword: string; bkashApiKey: string;
+  whatsappNumber: string; smsApiKey: string;
 }
 
-const DEFAULT: Settings = {
-  gtmId: "", pixelId: "", bdcourierApiKey: "",
-  pathaoClientId: "", pathaoClientSecret: "",
-  steadfastApiKey: "", steadfastSecretKey: "",
-  uddoktapayApiKey: "", uddoktapayApiSecret: "",
+const EMPTY: Settings = {
+  gtmId: "", pixelId: "", tiktokPixelId: "", ga4MeasurementId: "",
+  bdcourierApiKey: "", pathaoClientId: "", pathaoClientSecret: "",
+  steadfastApiKey: "", steadfastSecretKey: "", oneclickApiKey: "",
+  uddoktapayApiKey: "", uddoktapayApiSecret: "", sslcommerzStoreId: "", sslcommerzPassword: "", bkashApiKey: "",
+  whatsappNumber: "", smsApiKey: "",
 };
 
-function ApiSection({
-  title, icon: Icon, gradient, children, docUrl, docLabel
-}: {
-  title: string; icon: typeof Tag; gradient: string;
-  children: React.ReactNode; docUrl?: string; docLabel?: string;
-}) {
+const AI_INPUT = "w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all";
+const AI_INPUT_STYLE = { background: "rgba(255,23,68,0.04)", border: "1px solid rgba(255,23,68,0.15)" };
+const AI_INPUT_FOCUS: React.CSSProperties = { borderColor: "rgba(255,23,68,0.4)", boxShadow: "0 0 16px rgba(255,23,68,0.1)" };
+
+function SecretInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState(false);
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}>
-      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
-            <Icon className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
-          </div>
-          <div>
-            <h2 className="font-black text-white text-sm tracking-tight">{title}</h2>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>API Configuration</p>
-          </div>
-        </div>
-        {docUrl && (
-          <a href={docUrl} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
-            <ExternalLink className="w-3 h-3" /> {docLabel ?? "Docs"}
-          </a>
-        )}
-      </div>
-      <div className="p-6 space-y-4">{children}</div>
+    <div className="relative">
+      <input type={show ? "text" : "password"} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder || "Enter API key…"}
+        className={`${AI_INPUT} pr-10`}
+        style={{ ...AI_INPUT_STYLE, ...(focused ? AI_INPUT_FOCUS : {}) }}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+      <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors">
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
     </div>
   );
 }
 
-function Field({
-  label, placeholder, value, onChange, secret = false, hint
-}: {
-  label: string; placeholder: string; value: string;
-  onChange: (v: string) => void; secret?: boolean; hint?: string;
-}) {
-  const [show, setShow] = useState(false);
-  const inputType = secret && !show ? "password" : "text";
-
+function PlainInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const [focused, setFocused] = useState(false);
   return (
-    <div>
-      <label className="block text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</label>
-      <div className="relative">
-        <input
-          type={inputType}
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full h-11 px-4 text-white text-sm font-medium focus:outline-none transition-all rounded-xl placeholder:font-normal"
-          style={{
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)",
-            paddingRight: secret ? "44px" : "16px",
-          }}
-          onFocus={e => {
-            (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(201,162,39,0.5)";
-            (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.07)";
-          }}
-          onBlur={e => {
-            (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
-            (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.05)";
-          }}
-        />
-        {secret && (
-          <button type="button" onClick={() => setShow(s => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-            style={{ color: "rgba(255,255,255,0.25)" }}>
-            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
+    <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder || "Enter value…"}
+      className={AI_INPUT}
+      style={{ ...AI_INPUT_STYLE, ...(focused ? AI_INPUT_FOCUS : {}) }}
+      onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+  );
+}
+
+interface IntegrationCardProps {
+  name: string; description: string; docsUrl?: string; color: string;
+  fields: { label: string; key: keyof Settings; secret?: boolean; placeholder?: string }[];
+  settings: Settings; onChange: (key: keyof Settings, value: string) => void; onSave: () => void; saving: boolean; saved: boolean;
+}
+
+function IntegrationCard({ name, description, docsUrl, color, fields, settings, onChange, onSave, saving, saved }: IntegrationCardProps) {
+  return (
+    <div className="rounded-2xl overflow-hidden transition-all duration-200" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${color}20` }}>
+      <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${color}12` }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
+          <Zap className="w-4 h-4" style={{ color }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-black uppercase tracking-widest text-white">{name}</p>
+          <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">{description}</p>
+        </div>
+        {docsUrl && (
+          <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-400 transition-colors flex-shrink-0">
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         )}
       </div>
-      {hint && <p className="text-[10px] font-medium mt-1.5" style={{ color: "rgba(255,255,255,0.2)" }}>{hint}</p>}
+      <div className="p-5 space-y-3">
+        {fields.map(({ label, key, secret, placeholder }) => (
+          <div key={key}>
+            <label className="block text-[9px] font-black uppercase tracking-widest text-slate-600 mb-1.5">{label}</label>
+            {secret
+              ? <SecretInput value={settings[key]} onChange={v => onChange(key, v)} placeholder={placeholder} />
+              : <PlainInput value={settings[key]} onChange={v => onChange(key, v)} placeholder={placeholder} />}
+          </div>
+        ))}
+        <button onClick={onSave} disabled={saving}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-60 mt-4"
+          style={saved
+            ? { background: "rgba(52,211,153,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.3)" }
+            : { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: "white", boxShadow: `0 0 20px ${color}40` }}>
+          {saved ? <><Check className="w-3.5 h-3.5" />Saved!</> : saving ? <><svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeOpacity=".25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>Saving…</> : <><Save className="w-3.5 h-3.5" />Save {name}</>}
+        </button>
+      </div>
     </div>
   );
 }
 
 export default function AdminSettings() {
-  const [form, setForm] = useState<Settings>(DEFAULT);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
-
-  const set = (key: keyof Settings) => (v: string) => setForm(f => ({ ...f, [key]: v }));
+  const [settings, setSettings] = useState<Settings>(EMPTY);
+  const [loading, setLoading]   = useState(true);
+  const [savingGroup, setSavingGroup] = useState<string | null>(null);
+  const [savedGroup, setSavedGroup]   = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/settings", { headers: { "x-admin-key": ADMIN_KEY } })
-      .then(r => r.json()).then((d: Settings) => { setForm(d); setLoading(false); })
-      .catch(() => setLoading(false));
+    const fetch_ = async () => {
+      try {
+        const res = await fetch("/api/admin/settings", { headers: { "X-Admin-Key": ADMIN_KEY } });
+        const data = await res.json();
+        setSettings(prev => ({ ...prev, ...data }));
+      } catch { /* silent */ }
+      setLoading(false);
+    };
+    fetch_();
   }, []);
 
-  const handleSave = async () => {
-    setSaving(true); setError(""); setSaved(false);
+  const handleChange = (key: keyof Settings, value: string) => setSettings(prev => ({ ...prev, [key]: value }));
+
+  const saveGroup = async (groupId: string, keys: (keyof Settings)[]) => {
+    setSavingGroup(groupId);
     try {
-      const res = await fetch("/api/admin/settings", {
-        method: "PATCH",
-        headers: { "content-type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify(form),
-      });
-      if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
-      else setError("Failed to save. Please try again.");
-    } catch { setError("Network error. Check connection."); }
-    finally { setSaving(false); }
+      const body: Partial<Settings> = {};
+      keys.forEach(k => { body[k] = settings[k]; });
+      await fetch("/api/admin/settings", { method: "POST", headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY }, body: JSON.stringify(body) });
+      setSavedGroup(groupId);
+      setTimeout(() => setSavedGroup(null), 2500);
+    } catch { /* silent */ }
+    setSavingGroup(null);
   };
 
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="space-y-4 max-w-2xl">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />)}
-        </div>
-      </AdminLayout>
-    );
-  }
+  const INTEGRATIONS = [
+    {
+      section: "Analytics & Tracking",
+      sectionIcon: BarChart3,
+      sectionColor: "#60a5fa",
+      cards: [
+        { id: "gtm", name: "Google Tag Manager", description: "GTM Container ID", docsUrl: "https://tagmanager.google.com", color: "#4285f4", fields: [{ label: "Container ID", key: "gtmId" as keyof Settings, placeholder: "GTM-XXXXXXX" }] },
+        { id: "pixel", name: "Meta Pixel", description: "Facebook / Instagram Ads", docsUrl: "https://business.facebook.com/events_manager", color: "#1877f2", fields: [{ label: "Pixel ID", key: "pixelId" as keyof Settings, placeholder: "123456789012345" }] },
+        { id: "tiktok", name: "TikTok Pixel", description: "TikTok Ads Attribution", color: "#fe2c55", fields: [{ label: "Pixel ID", key: "tiktokPixelId" as keyof Settings, placeholder: "C1234ABCD..." }] },
+        { id: "ga4", name: "Google Analytics 4", description: "GA4 Measurement ID", color: "#e8710a", fields: [{ label: "Measurement ID", key: "ga4MeasurementId" as keyof Settings, placeholder: "G-XXXXXXXXXX" }] },
+      ],
+    },
+    {
+      section: "Delivery Couriers",
+      sectionIcon: Truck,
+      sectionColor: "#f59e0b",
+      cards: [
+        { id: "bdcourier", name: "BD Courier", description: "Fraud Check + Delivery", color: "#22c55e", fields: [{ label: "API Key", key: "bdcourierApiKey" as keyof Settings, secret: true, placeholder: "bdcourier_key_..." }] },
+        { id: "steadfast", name: "Steadfast Courier", description: "COD Delivery Bangladesh", docsUrl: "https://steadfast.com.bd", color: "#f59e0b", fields: [{ label: "API Key", key: "steadfastApiKey" as keyof Settings, secret: true }, { label: "Secret Key", key: "steadfastSecretKey" as keyof Settings, secret: true }] },
+        { id: "pathao", name: "Pathao", description: "Pathao Last Mile Delivery", docsUrl: "https://merchant.pathao.com", color: "#ef4444", fields: [{ label: "Client ID", key: "pathaoClientId" as keyof Settings, placeholder: "pathao-..." }, { label: "Client Secret", key: "pathaoClientSecret" as keyof Settings, secret: true }] },
+        { id: "oneclick", name: "One Click Delivery", description: "One Click BD Logistics", color: "#8b5cf6", fields: [{ label: "API Key", key: "oneclickApiKey" as keyof Settings, secret: true, placeholder: "oneclick_..." }] },
+      ],
+    },
+    {
+      section: "Payment Gateways",
+      sectionIcon: CreditCard,
+      sectionColor: "#a78bfa",
+      cards: [
+        { id: "uddoktapay", name: "Uddokta Pay", description: "Mobile Payment Gateway BD", color: "#ff6b35", fields: [{ label: "API Key", key: "uddoktapayApiKey" as keyof Settings, secret: true }, { label: "API Secret", key: "uddoktapayApiSecret" as keyof Settings, secret: true }] },
+        { id: "sslcommerz", name: "SSLCommerz", description: "Card & Mobile Banking BD", docsUrl: "https://sslcommerz.com", color: "#1a73e8", fields: [{ label: "Store ID", key: "sslcommerzStoreId" as keyof Settings, placeholder: "yourstore123" }, { label: "Store Password", key: "sslcommerzPassword" as keyof Settings, secret: true }] },
+        { id: "bkash", name: "bKash Payment", description: "bKash API Integration", color: "#e2136e", fields: [{ label: "API Key", key: "bkashApiKey" as keyof Settings, secret: true, placeholder: "bkash_api_..." }] },
+      ],
+    },
+    {
+      section: "Notifications",
+      sectionIcon: Bell,
+      sectionColor: "#34d399",
+      cards: [
+        { id: "whatsapp", name: "WhatsApp Business", description: "Customer Notifications", color: "#25d366", fields: [{ label: "WhatsApp Number", key: "whatsappNumber" as keyof Settings, placeholder: "+880 1XXXXXXXXX" }] },
+        { id: "sms", name: "SMS Gateway", description: "BD SMS API Integration", color: "#f59e0b", fields: [{ label: "SMS API Key", key: "smsApiKey" as keyof Settings, secret: true, placeholder: "sms_key_..." }] },
+      ],
+    },
+  ];
 
   return (
     <AdminLayout>
-      <div className="max-w-2xl space-y-7">
-        {/* Header */}
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1" style={{ color: "rgba(255,255,255,0.2)" }}>Configuration</p>
-            <h1 className="text-3xl font-black text-white tracking-tight">Settings</h1>
-          </div>
-          <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-50"
-            style={{
-              background: saved ? "linear-gradient(135deg, #34d399, #059669)" : "linear-gradient(135deg, #c9a227, #8a6f2b)",
-              color: saved ? "#fff" : "#000",
-              boxShadow: saved ? "0 4px 20px rgba(52,211,153,0.3)" : "0 4px 20px rgba(201,162,39,0.25)",
-            }}>
-            {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saved ? "Saved!" : saving ? "Saving…" : "Save All"}
-          </button>
+      <div className="p-6 space-y-10">
+        <div>
+          <h1 className="font-black text-3xl uppercase tracking-tight text-white">Integrations</h1>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mt-1">API Keys &amp; Third-party Connections</p>
         </div>
 
-        {error && (
-          <div className="px-4 py-3 rounded-xl text-sm font-bold"
-            style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
-            {error}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1,2,3,4,5,6].map(i => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />)}
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {INTEGRATIONS.map(({ section, sectionIcon: SectionIcon, sectionColor, cards }) => (
+              <div key={section}>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${sectionColor}15`, border: `1px solid ${sectionColor}25` }}>
+                    <SectionIcon className="w-3.5 h-3.5" style={{ color: sectionColor }} />
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-widest" style={{ color: sectionColor }}>{section}</p>
+                  <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${sectionColor}30, transparent)` }} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {cards.map(card => (
+                    <IntegrationCard
+                      key={card.id}
+                      name={card.name}
+                      description={card.description}
+                      docsUrl={card.docsUrl}
+                      color={card.color}
+                      fields={card.fields}
+                      settings={settings}
+                      onChange={handleChange}
+                      onSave={() => saveGroup(card.id, card.fields.map(f => f.key))}
+                      saving={savingGroup === card.id}
+                      saved={savedGroup === card.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Tracking & Analytics */}
-        <ApiSection title="Tracking & Analytics" icon={Tag} gradient="linear-gradient(135deg, #a78bfa, #7c3aed)"
-          docUrl="https://tagmanager.google.com/" docLabel="GTM Dashboard">
-          <Field label="Google Tag Manager ID" placeholder="GTM-XXXXXXX" value={form.gtmId} onChange={set("gtmId")}
-            hint="Format: GTM-XXXXXXX — injected on every storefront page automatically" />
-          <Field label="Meta Pixel ID" placeholder="123456789012345" value={form.pixelId} onChange={set("pixelId")}
-            hint="15-digit Facebook/Meta Pixel ID for conversion tracking" />
-        </ApiSection>
-
-        {/* BD Courier */}
-        <ApiSection title="BD Courier" icon={Truck} gradient="linear-gradient(135deg, #60a5fa, #2563eb)"
-          docUrl="https://app.bdcourier.com/merchant/api" docLabel="BD Courier API">
-          <Field label="BD Courier API Key" placeholder="Your BD Courier API key" value={form.bdcourierApiKey}
-            onChange={set("bdcourierApiKey")} secret
-            hint="Powers the Fraud Check button on the Leads page — checks customer cancellation history by phone number" />
-        </ApiSection>
-
-        {/* Pathao */}
-        <ApiSection title="Pathao Parcel Delivery" icon={Package} gradient="linear-gradient(135deg, #34d399, #059669)"
-          docUrl="https://merchant.pathao.com/api/documentation" docLabel="Pathao Docs">
-          <Field label="Client ID" placeholder="pathao_client_xxxxxxxxxxxxxx" value={form.pathaoClientId}
-            onChange={set("pathaoClientId")} hint="Found in your Pathao merchant developer settings" />
-          <Field label="Client Secret" placeholder="pathao_secret_xxxxxxxxxxxxx" value={form.pathaoClientSecret}
-            onChange={set("pathaoClientSecret")} secret hint="Keep private — never share your Pathao secret key" />
-        </ApiSection>
-
-        {/* Steadfast */}
-        <ApiSection title="Steadfast Parcel Delivery" icon={Zap} gradient="linear-gradient(135deg, #fbbf24, #d97706)"
-          docUrl="https://steadfast.com.bd/merchant/api-integration" docLabel="Steadfast Docs">
-          <Field label="API Key" placeholder="Your Steadfast API key" value={form.steadfastApiKey}
-            onChange={set("steadfastApiKey")} secret hint="Your Steadfast merchant API key" />
-          <Field label="Secret Key" placeholder="Your Steadfast secret key" value={form.steadfastSecretKey}
-            onChange={set("steadfastSecretKey")} secret hint="Steadfast secret key for request signing" />
-        </ApiSection>
-
-        {/* Uddokta Pay */}
-        <ApiSection title="Uddokta Pay" icon={CreditCard} gradient="linear-gradient(135deg, #f472b6, #db2777)"
-          docUrl="https://uddoktapay.com/api/documentation" docLabel="UddoktaPay Docs">
-          <Field label="API Key" placeholder="Your UddoktaPay API key" value={form.uddoktapayApiKey}
-            onChange={set("uddoktapayApiKey")} secret hint="Your UddoktaPay merchant API key" />
-          <Field label="API Secret" placeholder="Your UddoktaPay API secret" value={form.uddoktapayApiSecret}
-            onChange={set("uddoktapayApiSecret")} secret hint="UddoktaPay API secret for request authentication" />
-        </ApiSection>
-
-        {/* Bottom save */}
-        <div className="flex justify-end pb-4">
-          <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-50"
-            style={{
-              background: saved ? "linear-gradient(135deg, #34d399, #059669)" : "linear-gradient(135deg, #c9a227, #8a6f2b)",
-              color: saved ? "#fff" : "#000",
-            }}>
-            {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saved ? "Saved!" : "Save All Settings"}
+        {/* Save All */}
+        <div className="flex justify-end pt-4" style={{ borderTop: "1px solid rgba(255,23,68,0.1)" }}>
+          <button onClick={() => saveGroup("all", Object.keys(EMPTY) as (keyof Settings)[])}
+            disabled={!!savingGroup}
+            className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-60"
+            style={savedGroup === "all"
+              ? { background: "rgba(52,211,153,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.3)" }
+              : { background: "linear-gradient(135deg, #ff1744, #ff4500)", color: "white", boxShadow: "0 0 24px rgba(255,23,68,0.35)" }}>
+            {savedGroup === "all" ? <><Check className="w-4 h-4" />All Saved!</> : savingGroup === "all" ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeOpacity=".25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>Saving…</> : <><Save className="w-4 h-4" />Save All Integrations</>}
           </button>
         </div>
       </div>

@@ -1,356 +1,259 @@
 import { useEffect, useState, useCallback, Fragment } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Phone, RefreshCw, ChevronDown, MessageSquare, Check, X, Shield, AlertTriangle, ShieldCheck, ShieldX, Loader2 } from "lucide-react";
+import {
+  Phone, RefreshCw, ChevronDown, Search, Check, X,
+  Shield, ShieldCheck, ShieldX, Loader2, AlertTriangle, Zap,
+} from "lucide-react";
 
 const ADMIN_KEY = "besimple2024";
-
 const STATUSES = ["all", "new", "called", "converted", "not_interested"];
 
 const STATUS_META: Record<string, { label: string; dot: string; bg: string }> = {
-  new:            { label: "New Lead",    dot: "#60a5fa", bg: "rgba(96,165,250,0.12)" },
-  called:         { label: "Called",      dot: "#fbbf24", bg: "rgba(251,191,36,0.12)" },
-  converted:      { label: "Converted",   dot: "#34d399", bg: "rgba(52,211,153,0.12)" },
-  not_interested: { label: "No Interest", dot: "#6b7280", bg: "rgba(107,114,128,0.12)" },
+  new:           { label: "New Lead",      dot: "#60a5fa", bg: "rgba(96,165,250,0.1)" },
+  called:        { label: "Called",        dot: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
+  converted:     { label: "Converted",     dot: "#34d399", bg: "rgba(52,211,153,0.1)" },
+  not_interested:{ label: "Not Interested",dot: "#f87171", bg: "rgba(248,113,113,0.1)" },
 };
 
-const GRADE_CFG: Record<string, { label: string; color: string; bg: string; icon: typeof ShieldCheck; desc: string }> = {
-  "A+": { label: "A+", color: "#34d399", bg: "rgba(52,211,153,0.15)", icon: ShieldCheck, desc: "Excellent — 0% cancellation" },
-  "A":  { label: "A",  color: "#34d399", bg: "rgba(52,211,153,0.12)", icon: ShieldCheck, desc: "Great — <10% cancellation" },
-  "B":  { label: "B",  color: "#60a5fa", bg: "rgba(96,165,250,0.12)", icon: Shield,      desc: "Good — <25% cancellation" },
-  "C":  { label: "C",  color: "#fbbf24", bg: "rgba(251,191,36,0.12)", icon: Shield,      desc: "Moderate — <50% cancellation" },
-  "D":  { label: "D",  color: "#fb923c", bg: "rgba(251,146,60,0.12)", icon: AlertTriangle, desc: "Poor — <75% cancellation" },
-  "F":  { label: "F",  color: "#f87171", bg: "rgba(248,113,113,0.15)", icon: ShieldX,    desc: "Fraud risk — high cancellation" },
+const GRADE_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; desc: string }> = {
+  "A+": { label: "A+", color: "#34d399", bg: "rgba(52,211,153,0.12)",  icon: ShieldCheck,   desc: "Premium — High value, verified customer" },
+  "A":  { label: "A",  color: "#60a5fa", bg: "rgba(96,165,250,0.12)",  icon: ShieldCheck,   desc: "Excellent — Reliable repeat buyer" },
+  "B":  { label: "B",  color: "#a78bfa", bg: "rgba(167,139,250,0.12)", icon: Shield,        desc: "Good — Normal order pattern" },
+  "C":  { label: "C",  color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  icon: Shield,        desc: "Average — Proceed with caution" },
+  "D":  { label: "D",  color: "#fb923c", bg: "rgba(251,146,60,0.12)",  icon: AlertTriangle, desc: "Below Average — Verify before ship" },
+  "F":  { label: "F",  color: "#f87171", bg: "rgba(248,113,113,0.12)", icon: ShieldX,       desc: "Fraud Risk — Block or verify identity" },
 };
-
-interface FraudResult {
-  phone: string;
-  totalOrder: number;
-  cancelOrder: number;
-  cancelRate: number;
-  grade: string;
-}
-
-interface CartItem {
-  productId: number; productName?: string; size?: string; quantity: number; price?: number;
-}
 
 interface Lead {
-  id: number; phone: string; name: string; email: string;
-  cartItems: CartItem[]; cartTotal: number; status: string; notes: string; createdAt: string;
+  id: number; name: string; phone: string; address: string;
+  productInterest: string; message: string | null;
+  status: string; createdAt: string;
 }
+interface FraudResult { grade: string; score: number; reason: string; }
+
+const AI_INPUT_STYLE = { background: "rgba(255,23,68,0.04)", border: "1px solid rgba(255,23,68,0.15)", color: "#e2e8f0" };
 
 export default function AdminLeads() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [activeStatus, setActiveStatus] = useState("all");
-  const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [editNotes, setEditNotes] = useState<Record<number, string>>({});
-  const [savingNotes, setSavingNotes] = useState<number | null>(null);
-  const [fraudResults, setFraudResults] = useState<Record<number, FraudResult | "loading" | "error" | string>>({});
+  const [leads, setLeads]         = useState<Lead[]>([]);
+  const [filtered, setFiltered]   = useState<Lead[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [statusFilter, setStatus] = useState("all");
+  const [search, setSearch]       = useState("");
+  const [expanded, setExpanded]   = useState<number | null>(null);
+  const [updating, setUpdating]   = useState<number | null>(null);
+  const [fraudMap, setFraudMap]   = useState<Record<number, FraudResult | null>>({});
+  const [fraudLoading, setFraudLoading] = useState<Record<number, boolean>>({});
 
-  const fetchLeads = useCallback(() => {
+  const fetchLeads = useCallback(async () => {
     setLoading(true);
-    fetch(`/api/admin/leads?status=${activeStatus}`, { headers: { "x-admin-key": ADMIN_KEY } })
-      .then(r => r.json()).then((d: Lead[]) => { setLeads(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [activeStatus]);
+    try {
+      const res = await fetch("/api/admin/leads", { headers: { "X-Admin-Key": ADMIN_KEY } });
+      const data = await res.json();
+      setLeads(Array.isArray(data) ? data : []);
+    } catch { setLeads([]); }
+    setLoading(false);
+  }, []);
 
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
-  const updateLead = async (id: number, data: { status?: string; notes?: string }) => {
-    setUpdatingId(id);
+  useEffect(() => {
+    let list = [...leads].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (statusFilter !== "all") list = list.filter(l => l.status === statusFilter);
+    if (search.trim()) { const q = search.toLowerCase(); list = list.filter(l => l.name.toLowerCase().includes(q) || l.phone.includes(q)); }
+    setFiltered(list);
+  }, [leads, statusFilter, search]);
+
+  const updateStatus = async (id: number, status: string) => {
+    setUpdating(id);
     try {
-      const res = await fetch(`/api/admin/leads/${id}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        const updated = await res.json() as Lead;
-        setLeads(prev => prev.map(l => l.id === id ? updated : l));
-      }
-    } finally { setUpdatingId(null); }
+      await fetch(`/api/admin/leads/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY }, body: JSON.stringify({ status }) });
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+    } catch { /* silent */ }
+    setUpdating(null);
   };
 
-  const saveNotes = async (id: number) => {
-    setSavingNotes(id);
-    await updateLead(id, { notes: editNotes[id] ?? "" });
-    setSavingNotes(null);
-    setEditNotes(prev => { const n = { ...prev }; delete n[id]; return n; });
-  };
-
-  const checkFraud = async (leadId: number, phone: string) => {
-    setFraudResults(prev => ({ ...prev, [leadId]: "loading" }));
+  const checkFraud = async (lead: Lead) => {
+    setFraudLoading(prev => ({ ...prev, [lead.id]: true }));
     try {
-      const res = await fetch(`/api/admin/fraud-check?phone=${encodeURIComponent(phone)}`, {
-        headers: { "x-admin-key": ADMIN_KEY },
+      const res = await fetch("/api/admin/fraud-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY },
+        body: JSON.stringify({ name: lead.name, phone: lead.phone, address: lead.address }),
       });
-      const data = await res.json() as FraudResult & { error?: string };
-      if (!res.ok || data.error) {
-        setFraudResults(prev => ({ ...prev, [leadId]: data.error ?? "error" }));
-      } else {
-        setFraudResults(prev => ({ ...prev, [leadId]: data }));
-      }
+      const data = await res.json();
+      setFraudMap(prev => ({ ...prev, [lead.id]: data }));
     } catch {
-      setFraudResults(prev => ({ ...prev, [leadId]: "error" }));
+      setFraudMap(prev => ({ ...prev, [lead.id]: { grade: "C", score: 50, reason: "Could not reach fraud API. Manual review needed." } }));
     }
+    setFraudLoading(prev => ({ ...prev, [lead.id]: false }));
   };
-
-  const counts = STATUSES.reduce((acc, s) => {
-    acc[s] = s === "all" ? leads.length : leads.filter(l => l.status === s).length;
-    return acc;
-  }, {} as Record<string, number>);
 
   return (
     <AdminLayout>
-      <div className="space-y-7 max-w-7xl">
+      <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1" style={{ color: "rgba(255,255,255,0.2)" }}>Lead Management</p>
-            <h1 className="text-3xl font-black text-white tracking-tight">Incomplete Orders</h1>
-            <p className="text-sm font-medium mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Customers who entered their phone — call to convert them
-            </p>
+            <h1 className="font-black text-3xl uppercase tracking-tight text-white">Leads & COD</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mt-1">{filtered.length} of {leads.length} total</p>
           </div>
-          <button onClick={fetchLeads}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all self-start"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "white"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.5)"; }}
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          <button onClick={fetchLeads} disabled={loading} className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+            style={{ background: "rgba(255,23,68,0.08)", border: "1px solid rgba(255,23,68,0.2)", color: "#ff1744" }}>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />Refresh
           </button>
         </div>
 
-        {/* Status Filters */}
-        <div className="flex gap-2 flex-wrap">
-          {STATUSES.map(s => {
-            const sm = STATUS_META[s];
-            const isActive = activeStatus === s;
-            return (
-              <button key={s} onClick={() => setActiveStatus(s)}
-                className="px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
-                style={{
-                  background: isActive ? (s === "all" ? "rgba(201,162,39,0.15)" : sm.bg) : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${isActive ? (s === "all" ? "rgba(201,162,39,0.4)" : sm.dot + "55") : "rgba(255,255,255,0.08)"}`,
-                  color: isActive ? (s === "all" ? "#c9a227" : sm.dot) : "rgba(255,255,255,0.35)",
-                }}
-              >
-                {s === "all" ? "All" : sm.label}
-                {counts[s] > 0 && <span className="ml-1.5 opacity-60">({counts[s]})</span>}
-              </button>
-            );
-          })}
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name or phone…"
+              className="w-full px-3 py-2.5 pl-10 rounded-lg text-sm font-medium text-white outline-none transition-all"
+              style={AI_INPUT_STYLE} />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            {STATUSES.map(s => {
+              const cfg = STATUS_META[s];
+              return (
+                <button key={s} onClick={() => setStatus(s)}
+                  className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all"
+                  style={statusFilter === s
+                    ? { background: cfg ? cfg.bg : "rgba(255,23,68,0.12)", color: cfg ? cfg.dot : "#ff1744", border: `1px solid ${cfg ? cfg.dot + "50" : "rgba(255,23,68,0.3)"}` }
+                    : { background: "rgba(255,255,255,0.03)", color: "#475569", border: "1px solid rgba(255,23,68,0.1)" }}>
+                  {s === "all" ? "All" : STATUS_META[s]?.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          {loading ? (
-            <div className="p-8 space-y-3">
-              {[1,2,3,4].map(i => <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />)}
+        {/* Fraud Grade Legend */}
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(GRADE_META).map(([grade, { color, bg, label }]) => (
+            <div key={grade} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+              style={{ background: bg, border: `1px solid ${color}30` }}>
+              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color }}>Grade {label}</span>
             </div>
-          ) : !leads.length ? (
-            <div className="py-24 text-center">
-              <Phone className="w-12 h-12 mx-auto mb-4" style={{ color: "rgba(255,255,255,0.08)" }} />
-              <p className="font-black text-sm uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)" }}>No leads yet</p>
-              <p className="text-[11px] mt-2 font-medium" style={{ color: "rgba(255,255,255,0.15)" }}>Leads appear when customers enter phone on checkout</p>
+          ))}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,23,68,0.06)", border: "1px solid rgba(255,23,68,0.15)" }}>
+            <Shield className="w-3 h-3" style={{ color: "#ff1744" }} />
+            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: "#ff1744" }}>BD Fraud Check</span>
+          </div>
+        </div>
+
+        {/* Leads List */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,23,68,0.1)" }}>
+          {loading ? (
+            <div className="p-6 space-y-3">
+              {[1,2,3,4,5].map(i => <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />)}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-600">
+              <Phone className="w-10 h-10 mb-4 opacity-30" />
+              <p className="text-xs font-bold uppercase tracking-widest">No leads found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    {["Phone / Fraud", "Customer", "Cart", "Total", "Status", "Time", "Action"].map(h => (
-                      <th key={h} className="px-5 py-4 text-left text-[10px] font-black uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.map((lead, idx) => {
-                    const fraud = fraudResults[lead.id];
-                    const fraudData = typeof fraud === "object" && fraud !== null ? fraud as FraudResult : null;
-                    const gc = fraudData ? (GRADE_CFG[fraudData.grade] ?? GRADE_CFG["F"]) : null;
-                    const GradeIcon = gc?.icon ?? Shield;
-                    const isLast = idx === leads.length - 1;
-                    return (
-                      <Fragment key={lead.id}>
-                        <tr className="transition-colors cursor-pointer"
-                          style={{ borderBottom: !isLast || expandedId === lead.id ? "1px solid rgba(255,255,255,0.04)" : "none",
-                            background: expandedId === lead.id ? "rgba(255,255,255,0.025)" : "transparent" }}
-                          onMouseEnter={e => { if (expandedId !== lead.id) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)"; }}
-                          onMouseLeave={e => { if (expandedId !== lead.id) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                          onClick={() => setExpandedId(expandedId === lead.id ? null : lead.id)}
-                        >
-                          {/* Phone + Fraud */}
-                          <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
-                            <a href={`tel:${lead.phone}`}
-                              className="flex items-center gap-2 font-black text-sm transition-colors mb-1.5 w-fit"
-                              style={{ color: "#c9a227" }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#e8c84a"; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#c9a227"; }}
-                            >
-                              <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                              {lead.phone}
-                            </a>
-                            {/* Fraud check UI */}
-                            {fraud === "loading" ? (
-                              <div className="flex items-center gap-1.5 text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>
-                                <Loader2 className="w-3 h-3 animate-spin" /> Checking...
-                              </div>
-                            ) : fraudData && gc ? (
-                              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg w-fit"
-                                style={{ background: gc.bg, border: `1px solid ${gc.color}33` }}>
-                                <GradeIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: gc.color }} />
-                                <span className="font-black text-[11px]" style={{ color: gc.color }}>Grade {gc.label}</span>
-                                <span className="text-[10px] font-bold opacity-70" style={{ color: gc.color }}>
-                                  {fraudData.cancelOrder}/{fraudData.totalOrder} cancelled ({fraudData.cancelRate}%)
-                                </span>
-                              </div>
-                            ) : typeof fraud === "string" && fraud !== "loading" ? (
-                              <div className="text-[10px] font-bold px-2.5 py-1 rounded-lg" style={{ background: "rgba(248,113,113,0.1)", color: "#f87171" }}>
-                                {fraud === "error" ? "API error — check BD Courier key in Settings" : fraud}
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => checkFraud(lead.id, lead.phone)}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all"
-                                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
-                                onMouseEnter={e => {
-                                  const b = e.currentTarget as HTMLButtonElement;
-                                  b.style.background = "rgba(248,113,113,0.12)";
-                                  b.style.borderColor = "rgba(248,113,113,0.3)";
-                                  b.style.color = "#f87171";
-                                }}
-                                onMouseLeave={e => {
-                                  const b = e.currentTarget as HTMLButtonElement;
-                                  b.style.background = "rgba(255,255,255,0.05)";
-                                  b.style.borderColor = "rgba(255,255,255,0.1)";
-                                  b.style.color = "rgba(255,255,255,0.4)";
-                                }}
-                              >
-                                <Shield className="w-3 h-3" /> Check Fraud
+            <div className="divide-y" style={{ borderColor: "rgba(255,23,68,0.05)" }}>
+              {filtered.map(lead => {
+                const cfg = STATUS_META[lead.status] || { label: lead.status, dot: "#64748b", bg: "rgba(100,116,139,0.1)" };
+                const isExp = expanded === lead.id;
+                const fraud = fraudMap[lead.id];
+                const fraudGradeMeta = fraud ? GRADE_META[fraud.grade] : null;
+                const FraudIcon = fraudGradeMeta?.icon || Shield;
+                return (
+                  <Fragment key={lead.id}>
+                    <div className="flex items-center px-5 py-4 cursor-pointer hover:bg-white/[0.02] transition-colors gap-4"
+                      onClick={() => setExpanded(isExp ? null : lead.id)}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,23,68,0.08)", border: "1px solid rgba(255,23,68,0.15)" }}>
+                        <Phone className="w-4 h-4" style={{ color: "#ff1744" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-black uppercase tracking-wide text-white truncate">{lead.name}</p>
+                          {fraud && fraudGradeMeta && (
+                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest"
+                              style={{ background: fraudGradeMeta.bg, color: fraudGradeMeta.color, border: `1px solid ${fraudGradeMeta.color}40` }}>
+                              <FraudIcon className="w-2.5 h-2.5" />Grade {fraud.grade}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-600">{lead.phone} · {lead.productInterest}</p>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex-shrink-0"
+                        style={{ background: cfg.bg, color: cfg.dot, border: `1px solid ${cfg.dot}30` }}>
+                        {cfg.label}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 text-slate-600 flex-shrink-0 transition-transform duration-200 ${isExp ? "rotate-180" : ""}`} />
+                    </div>
+
+                    {isExp && (
+                      <div className="px-5 py-5 space-y-4" style={{ background: "rgba(255,23,68,0.03)", borderTop: "1px solid rgba(255,23,68,0.06)" }}>
+                        {/* Info */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-4 rounded-xl space-y-2 text-xs" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,23,68,0.08)" }}>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Lead Details</p>
+                            <p className="font-bold text-white">{lead.name}</p>
+                            <p className="font-bold text-slate-400">{lead.phone}</p>
+                            <p className="font-bold text-slate-500 leading-relaxed">{lead.address}</p>
+                            <p className="font-bold" style={{ color: "#ff1744" }}>{lead.productInterest}</p>
+                            {lead.message && <p className="text-slate-600 italic">"{lead.message}"</p>}
+                            <p className="text-slate-700 text-[9px] uppercase tracking-widest">{new Date(lead.createdAt).toLocaleString("en-BD")}</p>
+                          </div>
+
+                          {/* Fraud Check Panel */}
+                          <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,23,68,0.08)" }}>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-3">Fraud Intelligence</p>
+                            {!fraud && !fraudLoading[lead.id] && (
+                              <button onClick={() => checkFraud(lead)} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
+                                style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", color: "white", boxShadow: "0 0 20px rgba(255,23,68,0.3)" }}>
+                                <Shield className="w-4 h-4" />Run Fraud Check
                               </button>
                             )}
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <p className="font-bold text-white text-sm">{lead.name || <span style={{ color: "rgba(255,255,255,0.2)", fontStyle: "italic" }}>Unknown</span>}</p>
-                            <p className="text-[10px] font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{lead.email || "—"}</p>
-                          </td>
-                          <td className="px-5 py-4 text-sm font-bold" style={{ color: "rgba(255,255,255,0.45)" }}>
-                            {lead.cartItems.length} item{lead.cartItems.length !== 1 ? "s" : ""}
-                          </td>
-                          <td className="px-5 py-4 font-black text-sm whitespace-nowrap" style={{ color: "#c9a227" }}>
-                            ৳{lead.cartTotal.toFixed(0)}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
-                              style={{
-                                background: STATUS_META[lead.status]?.bg ?? "rgba(255,255,255,0.06)",
-                                color: STATUS_META[lead.status]?.dot ?? "rgba(255,255,255,0.4)",
-                              }}>
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_META[lead.status]?.dot ?? "rgba(255,255,255,0.4)" }} />
-                              {STATUS_META[lead.status]?.label ?? lead.status}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-[11px] font-bold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.25)" }}>
-                            {new Date(lead.createdAt).toLocaleDateString("en-BD", { day: "2-digit", month: "short" })}
-                            <br />
-                            {new Date(lead.createdAt).toLocaleTimeString("en-BD", { hour: "2-digit", minute: "2-digit" })}
-                          </td>
-                          <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
-                            <div className="relative">
-                              <select
-                                value={lead.status}
-                                onChange={e => updateLead(lead.id, { status: e.target.value })}
-                                disabled={updatingId === lead.id}
-                                className="appearance-none text-white text-[10px] font-black uppercase tracking-wider px-3 py-2 pr-7 focus:outline-none transition-colors disabled:opacity-50 cursor-pointer rounded-lg"
-                                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                              >
-                                <option value="new">New Lead</option>
-                                <option value="called">Called</option>
-                                <option value="converted">Converted</option>
-                                <option value="not_interested">No Interest</option>
-                              </select>
-                              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: "rgba(255,255,255,0.3)" }} />
-                            </div>
-                          </td>
-                        </tr>
-
-                        {/* Expanded Row */}
-                        {expandedId === lead.id && (
-                          <tr style={{ borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)" }}>
-                            <td colSpan={7} className="px-6 py-5" style={{ background: "rgba(0,0,0,0.2)" }}>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Cart */}
-                                <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest mb-3" style={{ color: "#c9a227" }}>Cart Items</p>
-                                  {lead.cartItems.length === 0 ? (
-                                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.2)" }}>No items captured</p>
-                                  ) : (
-                                    <div className="space-y-2">
-                                      {lead.cartItems.map((item, i) => (
-                                        <div key={i} className="flex justify-between items-center text-sm py-1.5 px-3 rounded-xl"
-                                          style={{ background: "rgba(255,255,255,0.04)" }}>
-                                          <span className="font-bold" style={{ color: "rgba(255,255,255,0.6)" }}>
-                                            {item.productName ?? `Product #${item.productId}`}
-                                            {item.size ? ` · ${item.size}` : ""} × {item.quantity}
-                                          </span>
-                                          <span className="font-black" style={{ color: "#c9a227" }}>৳{((item.price ?? 0) * item.quantity).toFixed(0)}</span>
-                                        </div>
-                                      ))}
-                                      <div className="flex justify-between text-sm pt-2 px-3">
-                                        <span className="font-black text-white uppercase tracking-wider">Total</span>
-                                        <span className="font-black text-lg" style={{ color: "#c9a227" }}>৳{lead.cartTotal.toFixed(0)}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Notes */}
-                                <div>
-                                  <p className="text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2" style={{ color: "#c9a227" }}>
-                                    <MessageSquare className="w-3 h-3" /> Call Notes
-                                  </p>
-                                  <textarea
-                                    value={editNotes[lead.id] ?? lead.notes}
-                                    onChange={e => setEditNotes(prev => ({ ...prev, [lead.id]: e.target.value }))}
-                                    placeholder="Add notes (e.g., 'Interested, call back Friday 3pm')"
-                                    rows={3}
-                                    className="w-full text-white text-sm font-medium p-3 focus:outline-none transition-colors resize-none rounded-xl"
-                                    style={{
-                                      background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-                                      color: "rgba(255,255,255,0.8)",
-                                    }}
-                                    onFocus={e => { (e.currentTarget as HTMLTextAreaElement).style.borderColor = "rgba(201,162,39,0.4)"; }}
-                                    onBlur={e => { (e.currentTarget as HTMLTextAreaElement).style.borderColor = "rgba(255,255,255,0.1)"; }}
-                                  />
-                                  {editNotes[lead.id] !== undefined && (
-                                    <div className="flex gap-2 mt-2">
-                                      <button onClick={() => saveNotes(lead.id)} disabled={savingNotes === lead.id}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                                        style={{ background: "rgba(201,162,39,0.2)", border: "1px solid rgba(201,162,39,0.4)", color: "#c9a227" }}>
-                                        <Check className="w-3 h-3" /> Save
-                                      </button>
-                                      <button onClick={() => setEditNotes(prev => { const n = { ...prev }; delete n[lead.id]; return n; })}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all"
-                                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}>
-                                        <X className="w-3 h-3" /> Cancel
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
+                            {fraudLoading[lead.id] && (
+                              <div className="flex flex-col items-center justify-center py-6 gap-3">
+                                <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#ff1744" }} />
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Analyzing…</p>
                               </div>
-                            </td>
-                          </tr>
-                        )}
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
+                            )}
+                            {fraud && fraudGradeMeta && (
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: fraudGradeMeta.bg, border: `1px solid ${fraudGradeMeta.color}30` }}>
+                                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${fraudGradeMeta.color}20` }}>
+                                    <FraudIcon className="w-5 h-5" style={{ color: fraudGradeMeta.color }} />
+                                  </div>
+                                  <div>
+                                    <p className="font-black text-2xl leading-none" style={{ color: fraudGradeMeta.color }}>Grade {fraud.grade}</p>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mt-0.5">Score: {fraud.score}/100</p>
+                                  </div>
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-400 leading-relaxed">{fraudGradeMeta.desc}</p>
+                                <p className="text-[10px] font-bold text-slate-500 leading-relaxed">{fraud.reason}</p>
+                                <button onClick={() => checkFraud(lead)} className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors" style={{ color: "rgba(255,23,68,0.6)" }}>
+                                  <RefreshCw className="w-3 h-3" />Re-check
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status Update */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mr-2">Update Status:</p>
+                          {Object.entries(STATUS_META).map(([key, { label, dot, bg }]) => (
+                            <button key={key} onClick={() => updateStatus(lead.id, key)} disabled={updating === lead.id || lead.status === key}
+                              className="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-1.5"
+                              style={lead.status === key ? { background: bg, color: dot, border: `1px solid ${dot}50` } : { background: "rgba(255,255,255,0.04)", color: "#475569", border: "1px solid rgba(255,23,68,0.1)" }}>
+                              {lead.status === key && <Check className="w-3 h-3" />}
+                              {updating === lead.id && lead.status !== key ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Fragment>
+                );
+              })}
             </div>
           )}
         </div>

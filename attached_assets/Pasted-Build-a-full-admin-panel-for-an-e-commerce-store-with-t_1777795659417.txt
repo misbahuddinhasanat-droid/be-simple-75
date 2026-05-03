@@ -1,0 +1,55 @@
+Build a full admin panel for an e-commerce store with the following exact UI:
+
+Layout:
+
+Fixed left sidebar, 220px wide, dark background (#111f11), with the store logo/name at the top
+Navigation items grouped into labeled sections: OVERVIEW (Dashboard), STORE (Orders, Products, Categories), MARKETING (Incomplete Orders with unread badge count), CONFIGURATION (Settings)
+A "Store Live" green status indicator at the bottom of the sidebar with a pulsing green dot
+"Back to Store" link at the very bottom of the sidebar
+Main content area with light gray-green background (#f6fbf6)
+Dashboard page (/admin):
+
+Header row: page title "Dashboard", today's date in small gray text, and a "Store Live" pill badge with pulsing green dot on the right
+Quick Actions row: 4 colored bordered buttons — Add Product (violet), View Orders (blue), Leads (amber), Integrations (green) — each with an icon
+4 KPI stat cards in a grid, each with a full gradient background color: Revenue (dark green gradient), Total Orders (blue gradient), Products (purple gradient), Low Stock (gray or red gradient depending on value). Each card has a circular icon, large number, label, and sub-label. Decorative bubble rings in bottom-right corner of each card
+If there are pending orders, show an amber alert banner with clock icon, message, and "View Orders →" button
+Revenue area chart (last 7 days) using Recharts AreaChart with green line and gradient fill, Live badge
+Top Products card with color-coded progress bars per product + mini BarChart for orders/day below it
+Recent Orders table with monospace order ID chip, customer name + email, date, amount, and status pills with colored dot + text (pending=amber, processing=blue, shipped=violet, delivered=emerald, cancelled=red)
+Orders page (/admin/orders):
+
+Table with all orders, filterable by status
+Status dropdown to update each order
+Customer details, product list per order, total, payment method
+Products page (/admin/products):
+
+Grid/table of all products with image thumbnail, name, category, price, original price (crossed out), stock count
+Add/Edit product form with: name, description, price, original_price, stock, category selector, image URL, featured toggle
+Delete button with confirmation
+Categories page (/admin/categories):
+
+List of categories with name and description
+Add/edit/delete category
+Incomplete Orders / Leads page (/admin/leads):
+
+List of leads (incomplete checkout captures) showing customer name, phone, product interest, timestamp
+Each lead is expandable
+Phone number shown prominently with a red "Check Fraud" button next to it
+Clicking Check Fraud calls BD Courier API and returns a grade badge: A (emerald/Safe), B (blue/Low Risk), C (amber/Medium Risk), D (orange/High Risk), F (red/Blacklisted)
+Expanded lead shows a full fraud report card: cancellation count, total orders, successful deliveries, cancellation rate % bar, and action recommendation
+Settings / Integrations page (/admin/settings):
+Organized into 4 sections with section header labels:
+
+ANALYTICS & TRACKING: Google Tag Manager (GTM Container ID), Facebook Pixel, TikTok Pixel, Twitter/X Pixel, Google Analytics 4
+DELIVERY PARTNERS: BD Courier (API Key), Steadfast Courier (API Key + Secret), Pathao Courier (Client ID + Secret + Username + Password), One Click Delivery (API Key)
+PAYMENT GATEWAYS: Uddokta Pay (API Key + Store ID), SSLCommerz (Store ID + Password), bKash Direct (App Key + Secret + Username + Password)
+NOTIFICATIONS: WhatsApp Business API (Phone ID + Access Token), SMS Gateway (API Key + Sender ID)
+Each integration is a card with: colored logo icon, title, "Not configured" / "Connected" status badge, optional Docs link, input fields (secrets have eye-toggle show/hide), and its own Save button with animated Saving → Saved states. All API keys stored in a store_settings key-value table in PostgreSQL.
+
+At the bottom: a dark green security notice card explaining that API keys are never exposed to the browser.
+
+Tech stack: React + Vite + TypeScript + Tailwind CSS + shadcn/ui + wouter routing + Recharts for charts + Express 5 backend + Drizzle ORM + PostgreSQL. All admin routes behind /admin prefix. API routes under /api/admin/.
+
+You can paste that directly and it'll produce the same panel. The key details that matter most are the sidebar structure, the KPI card gradients, the fraud check grade system, and the integrations hub with per-card save buttons.
+
+Next, I can add a "Deal of the Day" countdown timer banner on the home page that pulls a featured product from your admin and shows a live ticking discount timer to drive urgency. Would you like me to do that?

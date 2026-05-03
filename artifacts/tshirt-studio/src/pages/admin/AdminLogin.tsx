@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Flame, Zap } from "lucide-react";
+
+const CORRECT_PASSWORD = "admin123";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -12,102 +14,86 @@ export default function AdminLogin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     setTimeout(() => {
-      if (password === "admin123") {
+      if (password === CORRECT_PASSWORD) {
         localStorage.setItem("admin_auth", "besimple2024");
-        setLocation("/admin");
+        setLocation("/admin/dashboard");
       } else {
-        setError("Incorrect password. Try again.");
-        setPassword("");
+        setError("Incorrect password. Access denied.");
         setLoading(false);
       }
-    }, 400);
+    }, 700);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: "#07090f" }}>
-      {/* Background glow orbs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-[0.06]"
-          style={{ background: "radial-gradient(circle, #c9a227, transparent)", filter: "blur(80px)" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #7c3aed, transparent)", filter: "blur(100px)" }} />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ background: "#050508" }}>
+      {/* Ambient orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-3xl opacity-20 orb-red"
+          style={{ background: "radial-gradient(circle, #ff1744 0%, transparent 70%)" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full blur-3xl opacity-15 orb-orange"
+          style={{ background: "radial-gradient(circle, #ff4500 0%, transparent 70%)" }} />
       </div>
 
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo mark */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 shadow-2xl"
-            style={{ background: "linear-gradient(135deg, #c9a227 0%, #8a6f2b 100%)", boxShadow: "0 8px 40px rgba(201,162,39,0.35)" }}>
-            <ShieldCheck className="w-7 h-7 text-black" />
+      {/* Grid */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{ backgroundImage: "linear-gradient(rgba(255,23,68,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,23,68,1) 1px,transparent 1px)", backgroundSize: "50px 50px" }} />
+
+      <div className="relative z-10 w-full max-w-sm px-4">
+        {/* Card */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(7,3,14,0.95)", border: "1px solid rgba(255,23,68,0.2)", boxShadow: "0 0 80px rgba(255,23,68,0.08)" }}>
+          <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, #ff1744, #ff4500, #ff6b35)" }} />
+
+          <div className="p-8">
+            {/* Logo */}
+            <div className="text-center mb-8">
+              <div className="inline-flex w-16 h-16 rounded-2xl items-center justify-center mb-4"
+                style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", boxShadow: "0 0 40px rgba(255,23,68,0.4)" }}>
+                <Flame className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="font-black text-3xl uppercase tracking-tight gradient-text-red-orange">Be Simple 75</h1>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mt-1">Admin Access</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Password</label>
+                <div className="relative">
+                  <input
+                    type={show ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter admin password"
+                    autoComplete="current-password"
+                    className="w-full px-4 py-3.5 pr-11 rounded-xl bg-transparent text-sm font-medium text-white placeholder-slate-700 outline-none transition-all duration-200"
+                    style={{ border: error ? "1px solid rgba(255,23,68,0.6)" : "1px solid rgba(255,23,68,0.2)", background: "rgba(255,23,68,0.04)" }}
+                    onFocus={e => { e.currentTarget.style.borderColor = "rgba(255,23,68,0.5)"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,23,68,0.12)"; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = error ? "rgba(255,23,68,0.6)" : "rgba(255,23,68,0.2)"; e.currentTarget.style.boxShadow = "none"; }}
+                  />
+                  <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors">
+                    {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {error && <p className="text-xs font-bold mt-2" style={{ color: "#ff1744" }}>{error}</p>}
+              </div>
+
+              <button type="submit" disabled={loading || !password}
+                className="btn-ai w-full flex items-center justify-center gap-2.5 disabled:opacity-50 rounded-xl"
+                style={{ height: "52px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {loading ? (
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" strokeOpacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg>
+                  ) : <Zap className="w-4 h-4" fill="currentColor" />}
+                  {loading ? "Authenticating…" : "Enter Console"}
+                </span>
+              </button>
+            </form>
           </div>
-          <p className="font-black uppercase tracking-[0.35em] text-[10px] mb-1.5" style={{ color: "#c9a227" }}>Be Simple 75</p>
-          <h1 className="font-black text-white text-4xl tracking-tight">Admin Panel</h1>
-          <p className="text-sm font-medium mt-2" style={{ color: "rgba(255,255,255,0.3)" }}>Restricted access — authorized only</p>
         </div>
 
-        {/* Card */}
-        <form onSubmit={handleSubmit}
-          className="rounded-2xl p-8 space-y-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(20px)" }}>
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Admin Password
-            </label>
-            <div className="relative">
-              <input
-                type={show ? "text" : "password"}
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(""); }}
-                placeholder="Enter your password"
-                autoFocus
-                className="w-full h-12 px-4 pr-12 text-white text-sm font-medium focus:outline-none transition-all rounded-xl"
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: `1px solid ${error ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.09)"}`,
-                }}
-                onFocus={e => {
-                  if (!error) (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(201,162,39,0.5)";
-                  (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.07)";
-                }}
-                onBlur={e => {
-                  if (!error) (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
-                  (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.05)";
-                }}
-              />
-              <button type="button" onClick={() => setShow(s => !s)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: "rgba(255,255,255,0.25)" }}>
-                {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {error && (
-              <p className="text-[11px] font-bold mt-2" style={{ color: "#f87171" }}>{error}</p>
-            )}
-          </div>
-
-          <button type="submit" disabled={loading || !password}
-            className="w-full h-12 text-sm font-black uppercase tracking-widest transition-all rounded-xl disabled:opacity-40"
-            style={{
-              background: "linear-gradient(135deg, #c9a227 0%, #8a6f2b 100%)",
-              color: "#000",
-              boxShadow: loading ? "none" : "0 4px 24px rgba(201,162,39,0.3)",
-            }}>
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Verifying…
-              </span>
-            ) : "Enter Dashboard"}
-          </button>
-        </form>
-
-        <p className="text-center text-[10px] font-bold uppercase tracking-widest mt-6" style={{ color: "rgba(255,255,255,0.15)" }}>
-          Be Simple 75 · Secure Admin Portal
+        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-700 mt-6">
+          Be Simple 75 &mdash; Secured Admin Portal
         </p>
       </div>
     </div>
