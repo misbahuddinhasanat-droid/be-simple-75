@@ -6,6 +6,7 @@ import productsRouter from "./products";
 import cartRouter from "./cart";
 import ordersRouter from "./orders";
 import uploadRouter from "./upload";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -14,6 +15,7 @@ router.use(productsRouter);
 router.use(cartRouter);
 router.use(ordersRouter);
 router.use(uploadRouter);
+router.use(adminRouter);
 
 // Serve uploaded files statically
 router.use("/uploads", serveStatic(join(process.cwd(), "uploads")));
