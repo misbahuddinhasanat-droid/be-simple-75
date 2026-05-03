@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import Customize from "@/pages/Customize";
+import DesignTemplates from "@/pages/DesignTemplates";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import OrderConfirmation from "@/pages/OrderConfirmation";
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/products" component={Products} />
         <Route path="/product/:id" component={ProductDetail} />
         <Route path="/customize" component={Customize} />
+        <Route path="/design-templates" component={DesignTemplates} />
         <Route path="/cart" component={Cart} />
         <Route path="/checkout" component={Checkout} />
         <Route path="/order-confirmation/:id" component={OrderConfirmation} />

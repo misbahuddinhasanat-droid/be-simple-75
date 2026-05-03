@@ -23,6 +23,9 @@ export function Navbar() {
             <Link href="/customize" className="text-zinc-400 hover:text-white transition-colors">
               Studio
             </Link>
+            <Link href="/design-templates" className="text-zinc-400 hover:text-white transition-colors">
+              Templates
+            </Link>
           </nav>
         </div>
 
@@ -53,6 +56,9 @@ export function Navbar() {
           </Link>
           <Link href="/customize" onClick={() => setIsOpen(false)} className="text-2xl font-black uppercase tracking-widest text-white">
             Studio
+          </Link>
+          <Link href="/design-templates" onClick={() => setIsOpen(false)} className="text-2xl font-black uppercase tracking-widest text-white">
+            Templates
           </Link>
         </div>
       )}
