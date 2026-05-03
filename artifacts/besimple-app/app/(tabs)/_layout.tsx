@@ -21,6 +21,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bag", selected: "bag.fill" }} />
         <Label>Cart</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="admin">
+        <Icon sf={{ default: "shield", selected: "shield.fill" }} />
+        <Label>Admin</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
         <Label>About</Label>
@@ -32,7 +36,6 @@ function NativeTabLayout() {
 function ClassicTabLayout() {
   const colors = useColors();
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
   const { itemCount } = useCart();
@@ -88,6 +91,18 @@ function ClassicTabLayout() {
               <SymbolView name="bag" tintColor={color} size={24} />
             ) : (
               <Feather name="shopping-cart" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Admin",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="shield" tintColor={color} size={24} />
+            ) : (
+              <Feather name="shield" size={22} color={color} />
             ),
         }}
       />
