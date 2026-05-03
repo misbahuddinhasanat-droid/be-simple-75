@@ -4,30 +4,33 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Paintbrush, Minus, Plus } from "lucide-react";
+import { Paintbrush, Minus, Plus, Zap, ShoppingBag } from "lucide-react";
+import { useBuyNow } from "@/hooks/useBuyNow";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
-  const { data: product, isLoading, error } = useGetProduct(Number(id), { 
-    query: { enabled: !!id, queryKey: [`/api/products/${id}`] } 
+  const { data: product, isLoading, error } = useGetProduct(Number(id), {
+    query: { enabled: !!id, queryKey: [`/api/products/${id}`] },
   });
   const addCartItem = useAddCartItem();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { buyNow, isPending: isBuyingNow } = useBuyNow();
 
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
+  const [sizeError, setSizeError] = useState(false);
 
   if (isLoading) {
     return (
       <div className="bg-[#0a0a0a] min-h-screen">
         <div className="container px-4 md:px-8 py-16 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="aspect-[4/5] bg-[#111] animate-pulse border border-[#1f1f1f]"></div>
+          <div className="aspect-[4/5] bg-[#111] animate-pulse border border-[#1f1f1f]" />
           <div className="space-y-8 py-8">
-            <div className="h-16 bg-[#111] animate-pulse w-3/4"></div>
-            <div className="h-10 bg-[#111] animate-pulse w-1/4"></div>
-            <div className="h-40 bg-[#111] animate-pulse w-full"></div>
+            <div className="h-16 bg-[#111] animate-pulse w-3/4" />
+            <div className="h-10 bg-[#111] animate-pulse w-1/4" />
+            <div className="h-40 bg-[#111] animate-pulse w-full" />
           </div>
         </div>
       </div>
@@ -38,7 +41,7 @@ export default function ProductDetail() {
     return (
       <div className="bg-[#0a0a0a] min-h-screen flex items-center justify-center">
         <div className="container px-4 py-20 text-center">
-          <h2 className="font-display text-5xl font-black uppercase text-white mb-6">404 - Drop Not Found</h2>
+          <h2 className="font-display text-5xl font-black uppercase text-white mb-6">404 — Drop Not Found</h2>
           <p className="text-zinc-400 text-lg uppercase tracking-wider mb-10">The product you're looking for has vanished.</p>
           <Link href="/products">
             <Button className="h-16 px-10 font-black uppercase tracking-widest bg-white text-black hover:bg-zinc-200 rounded-none text-lg">
@@ -50,46 +53,50 @@ export default function ProductDetail() {
     );
   }
 
-  // Set defaults if not selected
   if (!selectedSize && product.sizes.length > 0) setSelectedSize(product.sizes[0]);
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      toast({
-        title: "Selection required",
-        description: "Please select a size.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const validateSize = () => {
+    if (!selectedSize) { setSizeError(true); return false; }
+    return true;
+  };
 
-    addCartItem.mutate({
-      data: {
-        productId: product.id,
-        size: selectedSize,
-        color: "Black", // All are black
-        quantity,
+  const handleAddToCart = () => {
+    if (!validateSize()) return;
+    addCartItem.mutate(
+      { data: { productId: product.id, size: selectedSize, color: "Black", quantity } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
+          toast({ title: "Added to Bag", description: `${quantity}× ${product.name} added.` });
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Could not add to bag.", variant: "destructive" });
+        },
       }
-    }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
-        toast({
-          title: "Added to Bag",
-          description: `${quantity}x ${product.name} has been added.`,
-        });
-      }
-    });
+    );
+  };
+
+  const handleBuyNow = () => {
+    if (!validateSize()) return;
+    buyNow(product.id, selectedSize, "Black", quantity);
   };
 
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-[#f0f0f0] pb-24">
       <div className="container px-4 md:px-8 py-12 lg:py-20">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-8">
+          <Link href="/products" className="hover:text-white transition-colors">Collection</Link>
+          <span>/</span>
+          <span className="text-zinc-400">{product.name}</span>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
           {/* Product Image */}
           <div className="aspect-[4/5] overflow-hidden bg-[#050505] sticky top-24 border-2 border-[#1f1f1f]">
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
+            <img
+              src={product.imageUrl}
+              alt={product.name}
               className="w-full h-full object-cover object-top"
             />
           </div>
@@ -97,41 +104,50 @@ export default function ProductDetail() {
           {/* Product Details */}
           <div className="flex flex-col py-4 md:py-10">
             <div className="mb-4">
-              <span className="text-xs font-black text-white bg-[#e63329] px-3 py-1 uppercase tracking-widest">{product.category}</span>
-            </div>
-            
-            <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 text-white leading-[0.9]">{product.name}</h1>
-            <p className="text-4xl font-black mb-10 text-[#e63329]">${product.price.toFixed(2)}</p>
-            
-            <div className="prose prose-invert mb-12">
-              <p className="text-zinc-400 text-lg leading-relaxed font-medium uppercase tracking-wide">{product.description}</p>
+              <span className="text-xs font-black text-white bg-[#e63329] px-3 py-1 uppercase tracking-widest">
+                {product.category}
+              </span>
             </div>
 
-            <div className="space-y-10 mb-12">
-              {/* Color - Always Black */}
-              <div>
-                <h3 className="font-black uppercase tracking-widest text-sm mb-4 text-white">Color</h3>
-                <div className="flex gap-3">
-                  <div className="w-12 h-12 rounded-none border-2 border-white bg-[#111]" title="Black" />
-                  <span className="flex items-center ml-2 text-zinc-400 font-bold uppercase text-sm">Heavyweight Black</span>
-                </div>
-              </div>
+            <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 text-white leading-[0.9]">
+              {product.name}
+            </h1>
+            <p className="text-4xl font-black mb-6 text-[#e63329]">${product.price.toFixed(2)}</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#e63329] mb-8">
+              Free Shipping · Heavyweight Black · 300gsm Cotton
+            </p>
 
+            <div className="prose prose-invert mb-10">
+              <p className="text-zinc-400 text-base leading-relaxed font-medium uppercase tracking-wide">
+                {product.description}
+              </p>
+            </div>
+
+            <div className="space-y-8 mb-10">
               {/* Size Selection */}
               <div>
                 <div className="flex justify-between items-end mb-4">
-                  <h3 className="font-black uppercase tracking-widest text-sm text-white">Size</h3>
-                  <button className="text-xs font-bold uppercase tracking-wider text-zinc-500 hover:text-white border-b border-zinc-500 hover:border-white transition-colors pb-0.5">Size Guide</button>
+                  <h3 className="font-black uppercase tracking-widest text-sm text-white">
+                    Size
+                    {selectedSize && <span className="text-zinc-400 ml-2">— {selectedSize}</span>}
+                  </h3>
+                  {sizeError && (
+                    <p className="text-[10px] font-black uppercase tracking-widest text-[#e63329]">
+                      Please select a size
+                    </p>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {product.sizes.map(size => (
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
                     <button
                       key={size}
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => { setSelectedSize(size); setSizeError(false); }}
                       className={`h-14 min-w-[3.5rem] px-4 border-2 font-black uppercase tracking-wider transition-all rounded-none ${
-                        selectedSize === size 
-                          ? 'border-white bg-white text-black' 
-                          : 'border-[#1f1f1f] bg-transparent hover:border-zinc-500 text-zinc-300'
+                        selectedSize === size
+                          ? "border-white bg-white text-black"
+                          : sizeError
+                          ? "border-[#e63329]/50 bg-transparent text-zinc-300 hover:border-zinc-500"
+                          : "border-[#1f1f1f] bg-transparent hover:border-zinc-500 text-zinc-300"
                       }`}
                     >
                       {size}
@@ -144,14 +160,14 @@ export default function ProductDetail() {
               <div>
                 <h3 className="font-black uppercase tracking-widest text-sm mb-4 text-white">Quantity</h3>
                 <div className="flex items-center border-2 border-[#1f1f1f] w-36 h-14 bg-[#050505]">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-12 h-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors hover:bg-[#1f1f1f]"
                   >
                     <Minus className="w-5 h-5" />
                   </button>
                   <div className="flex-1 text-center font-black text-lg text-white">{quantity}</div>
-                  <button 
+                  <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-12 h-full flex items-center justify-center text-zinc-400 hover:text-white transition-colors hover:bg-[#1f1f1f]"
                   >
@@ -161,28 +177,62 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 mt-auto">
-              <Button 
-                size="lg" 
-                className="w-full h-16 font-black uppercase tracking-widest text-lg bg-[#e63329] hover:bg-white hover:text-black text-white transition-colors border-2 border-transparent rounded-none"
+            {/* CTA Buttons */}
+            <div className="flex flex-col gap-3 mt-auto">
+              {/* Primary: Buy Now */}
+              <Button
+                size="lg"
+                className="w-full h-16 font-black uppercase tracking-widest text-lg bg-[#e63329] hover:bg-white hover:text-black text-white transition-colors border-2 border-transparent rounded-none flex items-center gap-3"
+                onClick={handleBuyNow}
+                disabled={isBuyingNow}
+              >
+                {isBuyingNow ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" fill="currentColor" />
+                    Buy Now — ${(product.price * quantity).toFixed(2)}
+                  </>
+                )}
+              </Button>
+
+              {/* Secondary: Add to Bag */}
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full h-14 font-black uppercase tracking-widest border-2 border-[#1f1f1f] bg-transparent hover:bg-[#1f1f1f] hover:text-white text-zinc-300 rounded-none flex items-center gap-3"
                 onClick={handleAddToCart}
                 disabled={addCartItem.isPending}
               >
+                <ShoppingBag className="w-5 h-5" />
                 {addCartItem.isPending ? "Adding..." : "Add to Bag"}
               </Button>
-              
-              {product.category === 'T-Shirts' && (
-                <Link href="/customize">
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    className="w-full h-16 font-black uppercase tracking-widest text-lg gap-3 border-2 border-[#1f1f1f] bg-transparent hover:bg-[#1f1f1f] hover:text-white text-zinc-300 rounded-none"
-                  >
-                    <Paintbrush className="w-5 h-5" />
-                    Customize This Blank
-                  </Button>
-                </Link>
-              )}
+
+              {/* Tertiary: Customize */}
+              <Link href="/customize">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="w-full h-12 font-black uppercase tracking-widest text-sm gap-3 bg-transparent hover:bg-[#111] text-zinc-500 hover:text-white rounded-none"
+                >
+                  <Paintbrush className="w-4 h-4" />
+                  Or Upload Your Own Design
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trust signals */}
+            <div className="mt-8 pt-6 border-t border-[#1f1f1f] grid grid-cols-3 gap-4 text-center">
+              {[
+                { label: "Free Shipping", sub: "Worldwide" },
+                { label: "Easy Returns", sub: "30-day policy" },
+                { label: "Secure Pay", sub: "Encrypted" },
+              ].map(({ label, sub }) => (
+                <div key={label}>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white">{label}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-zinc-600 mt-0.5">{sub}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
