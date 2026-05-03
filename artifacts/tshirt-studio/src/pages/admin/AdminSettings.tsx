@@ -1,189 +1,222 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Settings, Check, ExternalLink } from "lucide-react";
+import { Save, Check, Eye, EyeOff, ExternalLink, Tag, Package, Truck, CreditCard, Zap } from "lucide-react";
 
 const ADMIN_KEY = "besimple2024";
 
-interface SettingsData {
-  gtmId: string;
-  pixelId: string;
+interface Settings {
+  gtmId: string; pixelId: string; bdcourierApiKey: string;
+  pathaoClientId: string; pathaoClientSecret: string;
+  steadfastApiKey: string; steadfastSecretKey: string;
+  uddoktapayApiKey: string; uddoktapayApiSecret: string;
+}
+
+const DEFAULT: Settings = {
+  gtmId: "", pixelId: "", bdcourierApiKey: "",
+  pathaoClientId: "", pathaoClientSecret: "",
+  steadfastApiKey: "", steadfastSecretKey: "",
+  uddoktapayApiKey: "", uddoktapayApiSecret: "",
+};
+
+function ApiSection({
+  title, icon: Icon, gradient, children, docUrl, docLabel
+}: {
+  title: string; icon: typeof Tag; gradient: string;
+  children: React.ReactNode; docUrl?: string; docLabel?: string;
+}) {
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
+            <Icon className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
+          </div>
+          <div>
+            <h2 className="font-black text-white text-sm tracking-tight">{title}</h2>
+            <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>API Configuration</p>
+          </div>
+        </div>
+        {docUrl && (
+          <a href={docUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
+            <ExternalLink className="w-3 h-3" /> {docLabel ?? "Docs"}
+          </a>
+        )}
+      </div>
+      <div className="p-6 space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function Field({
+  label, placeholder, value, onChange, secret = false, hint
+}: {
+  label: string; placeholder: string; value: string;
+  onChange: (v: string) => void; secret?: boolean; hint?: string;
+}) {
+  const [show, setShow] = useState(false);
+  const inputType = secret && !show ? "password" : "text";
+
+  return (
+    <div>
+      <label className="block text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</label>
+      <div className="relative">
+        <input
+          type={inputType}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full h-11 px-4 text-white text-sm font-medium focus:outline-none transition-all rounded-xl placeholder:font-normal"
+          style={{
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)",
+            paddingRight: secret ? "44px" : "16px",
+          }}
+          onFocus={e => {
+            (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(201,162,39,0.5)";
+            (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.07)";
+          }}
+          onBlur={e => {
+            (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
+            (e.currentTarget as HTMLInputElement).style.background = "rgba(255,255,255,0.05)";
+          }}
+        />
+        {secret && (
+          <button type="button" onClick={() => setShow(s => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+            style={{ color: "rgba(255,255,255,0.25)" }}>
+            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
+      {hint && <p className="text-[10px] font-medium mt-1.5" style={{ color: "rgba(255,255,255,0.2)" }}>{hint}</p>}
+    </div>
+  );
 }
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState<SettingsData>({ gtmId: "", pixelId: "" });
+  const [form, setForm] = useState<Settings>(DEFAULT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState<SettingsData>({ gtmId: "", pixelId: "" });
+  const [error, setError] = useState("");
+
+  const set = (key: keyof Settings) => (v: string) => setForm(f => ({ ...f, [key]: v }));
 
   useEffect(() => {
     fetch("/api/admin/settings", { headers: { "x-admin-key": ADMIN_KEY } })
-      .then((r) => r.json())
-      .then((d: SettingsData) => {
-        setSettings(d);
-        setForm(d);
-        setLoading(false);
-      })
+      .then(r => r.json()).then((d: Settings) => { setForm(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true); setError(""); setSaved(false);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "content-type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ gtmId: form.gtmId, pixelId: form.pixelId }),
+        body: JSON.stringify(form),
       });
-      if (res.ok) {
-        const updated = await res.json() as SettingsData;
-        setSettings(updated);
-        setForm(updated);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-      }
-    } finally {
-      setSaving(false);
-    }
+      if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
+      else setError("Failed to save. Please try again.");
+    } catch { setError("Network error. Check connection."); }
+    finally { setSaving(false); }
   };
 
-  const isDirty = form.gtmId !== settings.gtmId || form.pixelId !== settings.pixelId;
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="space-y-4 max-w-2xl">
+          {[1,2,3,4,5].map(i => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />)}
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
-      <div className="space-y-8 max-w-2xl">
+      <div className="max-w-2xl space-y-7">
         {/* Header */}
-        <div>
-          <h1 className="font-black uppercase tracking-tight text-white text-3xl">Settings</h1>
-          <p className="text-[#7a8a99] text-xs font-bold uppercase tracking-widest mt-1">Tracking & analytics configuration</p>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1" style={{ color: "rgba(255,255,255,0.2)" }}>Configuration</p>
+            <h1 className="text-3xl font-black text-white tracking-tight">Settings</h1>
+          </div>
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-50"
+            style={{
+              background: saved ? "linear-gradient(135deg, #34d399, #059669)" : "linear-gradient(135deg, #c9a227, #8a6f2b)",
+              color: saved ? "#fff" : "#000",
+              boxShadow: saved ? "0 4px 20px rgba(52,211,153,0.3)" : "0 4px 20px rgba(201,162,39,0.25)",
+            }}>
+            {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saved ? "Saved!" : saving ? "Saving…" : "Save All"}
+          </button>
         </div>
 
-        {loading ? (
-          <div className="space-y-4">
-            {[1,2].map(i => <div key={i} className="h-24 bg-[#0d1b2a] border border-[#1a2840] animate-pulse rounded-sm" />)}
+        {error && (
+          <div className="px-4 py-3 rounded-xl text-sm font-bold"
+            style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+            {error}
           </div>
-        ) : (
-          <>
-            {/* GTM Card */}
-            <div className="bg-[#0d1b2a] border border-[#1a2840] rounded-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#1a2840] flex items-center gap-3">
-                <Settings className="w-4 h-4 text-[#b8973a]" />
-                <div>
-                  <h2 className="font-black uppercase tracking-wider text-white text-sm">Google Tag Manager</h2>
-                  <p className="text-[#7a8a99] text-[10px]">Dynamically injects GTM into the storefront</p>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-[#7a8a99] mb-2">
-                    GTM Container ID
-                  </label>
-                  <input
-                    value={form.gtmId}
-                    onChange={(e) => setForm(f => ({ ...f, gtmId: e.target.value }))}
-                    placeholder="GTM-XXXXXXX"
-                    className="w-full h-12 bg-[#111f33] border border-[#1a2840] px-4 text-white font-bold text-sm font-mono focus:outline-none focus:border-[#b8973a] transition-colors placeholder:text-[#4a5568]"
-                  />
-                  <p className="text-[#4a5568] text-[10px] mt-2">
-                    Find this in your{" "}
-                    <a href="https://tagmanager.google.com" target="_blank" rel="noreferrer" className="text-[#b8973a] hover:underline inline-flex items-center gap-0.5">
-                      GTM account <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
-                    {" "}— looks like GTM-XXXXXXX
-                  </p>
-                </div>
-
-                {form.gtmId && (
-                  <div className={`px-3 py-2 border rounded-sm text-[11px] font-bold ${
-                    /^GTM-[A-Z0-9]+$/.test(form.gtmId)
-                      ? "bg-green-500/10 border-green-500/30 text-green-400"
-                      : "bg-red-500/10 border-red-500/30 text-red-400"
-                  }`}>
-                    {/^GTM-[A-Z0-9]+$/.test(form.gtmId)
-                      ? `✓ Valid format — will inject GTM ${form.gtmId} on all pages`
-                      : "✗ Must start with GTM- followed by letters and numbers"}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Meta Pixel Card */}
-            <div className="bg-[#0d1b2a] border border-[#1a2840] rounded-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#1a2840] flex items-center gap-3">
-                <div className="w-4 h-4 bg-[#1877F2] rounded-sm flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-black text-[8px]">f</span>
-                </div>
-                <div>
-                  <h2 className="font-black uppercase tracking-wider text-white text-sm">Meta Pixel (Facebook)</h2>
-                  <p className="text-[#7a8a99] text-[10px]">Tracks PageView and conversion events for Facebook Ads</p>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-[#7a8a99] mb-2">
-                    Pixel ID
-                  </label>
-                  <input
-                    value={form.pixelId}
-                    onChange={(e) => setForm(f => ({ ...f, pixelId: e.target.value }))}
-                    placeholder="123456789012345"
-                    className="w-full h-12 bg-[#111f33] border border-[#1a2840] px-4 text-white font-bold text-sm font-mono focus:outline-none focus:border-[#b8973a] transition-colors placeholder:text-[#4a5568]"
-                  />
-                  <p className="text-[#4a5568] text-[10px] mt-2">
-                    Find this in{" "}
-                    <a href="https://business.facebook.com/events_manager" target="_blank" rel="noreferrer" className="text-[#b8973a] hover:underline inline-flex items-center gap-0.5">
-                      Meta Events Manager <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
-                    {" "}— a 15-digit number
-                  </p>
-                </div>
-
-                {form.pixelId && (
-                  <div className={`px-3 py-2 border rounded-sm text-[11px] font-bold ${
-                    /^\d{10,16}$/.test(form.pixelId)
-                      ? "bg-green-500/10 border-green-500/30 text-green-400"
-                      : "bg-red-500/10 border-red-500/30 text-red-400"
-                  }`}>
-                    {/^\d{10,16}$/.test(form.pixelId)
-                      ? `✓ Valid Pixel ID — will fire PageView on all pages`
-                      : "✗ Pixel ID should be 10–16 digits only"}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* How it works */}
-            <div className="bg-[#111f33]/50 border border-[#1a2840] rounded-sm p-5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#b8973a] mb-3">How it works</p>
-              <ul className="space-y-1.5 text-[#7a8a99] text-xs font-medium">
-                <li>• GTM and Pixel IDs are saved to the database — no redeploy needed</li>
-                <li>• Scripts load automatically on every page when a valid ID is set</li>
-                <li>• Leave blank to disable a tracker without breaking anything</li>
-                <li>• Changes take effect on the next page load / refresh</li>
-              </ul>
-            </div>
-
-            {/* Save button */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleSave}
-                disabled={saving || !isDirty}
-                className="flex items-center gap-2 px-8 py-3 bg-[#b8973a] hover:bg-[#d4af6a] text-[#0a1628] font-black uppercase tracking-widest text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {saving ? (
-                  <>Saving...</>
-                ) : saved ? (
-                  <><Check className="w-4 h-4" /> Saved!</>
-                ) : (
-                  "Save Settings"
-                )}
-              </button>
-              {saved && (
-                <p className="text-green-400 text-xs font-black uppercase tracking-widest">Changes applied — refresh storefront to activate</p>
-              )}
-            </div>
-          </>
         )}
+
+        {/* Tracking & Analytics */}
+        <ApiSection title="Tracking & Analytics" icon={Tag} gradient="linear-gradient(135deg, #a78bfa, #7c3aed)"
+          docUrl="https://tagmanager.google.com/" docLabel="GTM Dashboard">
+          <Field label="Google Tag Manager ID" placeholder="GTM-XXXXXXX" value={form.gtmId} onChange={set("gtmId")}
+            hint="Format: GTM-XXXXXXX — injected on every storefront page automatically" />
+          <Field label="Meta Pixel ID" placeholder="123456789012345" value={form.pixelId} onChange={set("pixelId")}
+            hint="15-digit Facebook/Meta Pixel ID for conversion tracking" />
+        </ApiSection>
+
+        {/* BD Courier */}
+        <ApiSection title="BD Courier" icon={Truck} gradient="linear-gradient(135deg, #60a5fa, #2563eb)"
+          docUrl="https://app.bdcourier.com/merchant/api" docLabel="BD Courier API">
+          <Field label="BD Courier API Key" placeholder="Your BD Courier API key" value={form.bdcourierApiKey}
+            onChange={set("bdcourierApiKey")} secret
+            hint="Powers the Fraud Check button on the Leads page — checks customer cancellation history by phone number" />
+        </ApiSection>
+
+        {/* Pathao */}
+        <ApiSection title="Pathao Parcel Delivery" icon={Package} gradient="linear-gradient(135deg, #34d399, #059669)"
+          docUrl="https://merchant.pathao.com/api/documentation" docLabel="Pathao Docs">
+          <Field label="Client ID" placeholder="pathao_client_xxxxxxxxxxxxxx" value={form.pathaoClientId}
+            onChange={set("pathaoClientId")} hint="Found in your Pathao merchant developer settings" />
+          <Field label="Client Secret" placeholder="pathao_secret_xxxxxxxxxxxxx" value={form.pathaoClientSecret}
+            onChange={set("pathaoClientSecret")} secret hint="Keep private — never share your Pathao secret key" />
+        </ApiSection>
+
+        {/* Steadfast */}
+        <ApiSection title="Steadfast Parcel Delivery" icon={Zap} gradient="linear-gradient(135deg, #fbbf24, #d97706)"
+          docUrl="https://steadfast.com.bd/merchant/api-integration" docLabel="Steadfast Docs">
+          <Field label="API Key" placeholder="Your Steadfast API key" value={form.steadfastApiKey}
+            onChange={set("steadfastApiKey")} secret hint="Your Steadfast merchant API key" />
+          <Field label="Secret Key" placeholder="Your Steadfast secret key" value={form.steadfastSecretKey}
+            onChange={set("steadfastSecretKey")} secret hint="Steadfast secret key for request signing" />
+        </ApiSection>
+
+        {/* Uddokta Pay */}
+        <ApiSection title="Uddokta Pay" icon={CreditCard} gradient="linear-gradient(135deg, #f472b6, #db2777)"
+          docUrl="https://uddoktapay.com/api/documentation" docLabel="UddoktaPay Docs">
+          <Field label="API Key" placeholder="Your UddoktaPay API key" value={form.uddoktapayApiKey}
+            onChange={set("uddoktapayApiKey")} secret hint="Your UddoktaPay merchant API key" />
+          <Field label="API Secret" placeholder="Your UddoktaPay API secret" value={form.uddoktapayApiSecret}
+            onChange={set("uddoktapayApiSecret")} secret hint="UddoktaPay API secret for request authentication" />
+        </ApiSection>
+
+        {/* Bottom save */}
+        <div className="flex justify-end pb-4">
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all disabled:opacity-50"
+            style={{
+              background: saved ? "linear-gradient(135deg, #34d399, #059669)" : "linear-gradient(135deg, #c9a227, #8a6f2b)",
+              color: saved ? "#fff" : "#000",
+            }}>
+            {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saved ? "Saved!" : "Save All Settings"}
+          </button>
+        </div>
       </div>
     </AdminLayout>
   );
