@@ -379,7 +379,10 @@ export default function Customize() {
                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Total</p>
                 <p className="font-black text-[11px] uppercase tracking-wide text-zinc-500 mt-0.5">Free shipping · No minimum</p>
               </div>
-              <p className="font-black text-2xl text-white">${(price * quantity).toFixed(2)}</p>
+              <div className="flex items-baseline gap-2">
+                <p className="font-black text-2xl text-white">৳{(price * quantity).toFixed(0)}</p>
+                <p className="text-zinc-600 font-bold text-sm line-through">৳{(999 * quantity).toFixed(0)}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -394,7 +397,7 @@ export default function Customize() {
             {isBuyingNow ? (
               <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
             ) : (
-              <><Zap className="w-4 h-4" fill="currentColor" />Buy Now — ${(price * quantity).toFixed(2)}</>
+              <><Zap className="w-4 h-4" fill="currentColor" />Buy Now — ৳{(price * quantity).toFixed(0)}</>
             )}
           </button>
           <button

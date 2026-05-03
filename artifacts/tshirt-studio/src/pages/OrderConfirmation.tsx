@@ -68,7 +68,7 @@ export default function OrderConfirmation() {
                     <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Black / {item.size} / QTY: {item.quantity}</p>
                   </div>
                   <div className="font-black text-[#e63329] text-xl flex items-center">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ৳{(item.price * item.quantity).toFixed(0)}
                   </div>
                 </div>
               ))}
@@ -85,7 +85,7 @@ export default function OrderConfirmation() {
               </div>
               <div className="text-left md:text-right w-full md:w-auto border-t-2 md:border-t-0 border-[#1f1f1f] pt-6 md:pt-0">
                 <p className="text-[10px] uppercase font-black tracking-widest text-zinc-500 mb-2">Total</p>
-                <p className="font-display text-5xl font-black text-white">${order.total.toFixed(2)}</p>
+                <p className="font-display text-5xl font-black text-white">৳{order.total.toFixed(0)}</p>
               </div>
             </div>
           </div>

@@ -112,7 +112,11 @@ export default function ProductDetail() {
             <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 text-white leading-[0.9]">
               {product.name}
             </h1>
-            <p className="text-4xl font-black mb-6 text-[#e63329]">${product.price.toFixed(2)}</p>
+            <div className="flex items-baseline gap-3 mb-6">
+              <p className="text-4xl font-black text-[#e63329]">৳{product.price.toFixed(0)}</p>
+              <p className="text-xl font-black text-zinc-600 line-through">৳999</p>
+              <span className="text-xs font-black bg-[#e63329] text-white px-2 py-1 uppercase tracking-widest">40% OFF</span>
+            </div>
             <p className="text-xs font-black uppercase tracking-widest text-[#e63329] mb-8">
               Free Shipping · Heavyweight Black · 300gsm Cotton
             </p>
@@ -191,7 +195,7 @@ export default function ProductDetail() {
                 ) : (
                   <>
                     <Zap className="w-5 h-5" fill="currentColor" />
-                    Buy Now — ${(product.price * quantity).toFixed(2)}
+                    Buy Now — ৳{(product.price * quantity).toFixed(0)}
                   </>
                 )}
               </Button>

@@ -111,7 +111,10 @@ export default function Products() {
                     </h3>
                   </Link>
                   <div className="flex items-center justify-between">
-                    <p className="text-[#e63329] font-black text-lg">${product.price.toFixed(2)}</p>
+                    <div className="flex items-baseline gap-1.5">
+                      <p className="text-[#e63329] font-black text-lg">৳{product.price.toFixed(0)}</p>
+                      <p className="text-zinc-600 font-bold text-sm line-through">৳999</p>
+                    </div>
                     <button
                       onClick={() =>
                         setQuickBuyProduct({

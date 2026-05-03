@@ -81,7 +81,10 @@ export default function Cart() {
                         <span className="text-[10px] font-black bg-[#e63329]/20 text-[#e63329] px-2 py-1 uppercase tracking-widest border border-[#e63329]/50">Custom Drop</span>
                       )}
                     </div>
-                    <p className="font-black text-xl text-[#e63329] whitespace-nowrap">${item.price.toFixed(2)}</p>
+                    <div className="text-right">
+                      <p className="font-black text-xl text-[#e63329] whitespace-nowrap">৳{item.price.toFixed(0)}</p>
+                      <p className="text-zinc-600 font-bold text-sm line-through">৳999</p>
+                    </div>
                   </div>
                   
                   <div className="mt-4 text-sm text-zinc-400 space-y-2 font-bold uppercase tracking-wider">
@@ -111,7 +114,7 @@ export default function Cart() {
               <div className="space-y-4 text-sm mb-8 pb-8 border-b-2 border-[#1f1f1f] font-bold uppercase tracking-wider">
                 <div className="flex justify-between text-zinc-400">
                   <span>Subtotal ({cart.itemCount} items)</span>
-                  <span className="text-white">${cart.total.toFixed(2)}</span>
+                  <span className="text-white">৳{cart.total.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-zinc-400">
                   <span>Shipping</span>
@@ -125,7 +128,7 @@ export default function Cart() {
               
               <div className="flex justify-between items-end mb-10">
                 <span className="font-black uppercase tracking-widest text-zinc-400">Total</span>
-                <span className="font-display text-4xl font-black text-white">${cart.total.toFixed(2)}</span>
+                <span className="font-display text-4xl font-black text-white">৳{cart.total.toFixed(0)}</span>
               </div>
 
               <Link href="/checkout" className="block w-full">

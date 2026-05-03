@@ -79,7 +79,10 @@ export function QuickBuyModal({ product, onClose }: QuickBuyModalProps) {
           </div>
           <div className="flex-1 min-w-0 pt-1">
             <p className="font-black uppercase tracking-wide text-white text-sm leading-tight line-clamp-2">{product.name}</p>
-            <p className="text-[#e63329] font-black text-xl mt-1">${product.price.toFixed(2)}</p>
+            <div className="flex items-baseline gap-2 mt-1">
+                    <p className="text-[#e63329] font-black text-xl">৳{product.price.toFixed(0)}</p>
+                    <p className="text-zinc-600 font-bold text-sm line-through">৳999</p>
+                  </div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">Heavyweight Black · Free Shipping</p>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1 flex-shrink-0">
@@ -127,7 +130,7 @@ export function QuickBuyModal({ product, onClose }: QuickBuyModalProps) {
             ) : (
               <>
                 <Zap className="w-4 h-4" fill="currentColor" />
-                Buy Now — ${product.price.toFixed(2)}
+                Buy Now — ৳{product.price.toFixed(0)}
               </>
             )}
           </button>

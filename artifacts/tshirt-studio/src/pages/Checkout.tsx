@@ -199,7 +199,7 @@ export default function Checkout() {
                   disabled={createOrder.isPending}
                 >
                   {createOrder.isPending ? <Loader2 className="w-6 h-6 animate-spin mr-3" /> : null}
-                  {createOrder.isPending ? "Processing..." : `Place Order — $${cart.total.toFixed(2)}`}
+                  {createOrder.isPending ? "Processing..." : `Place Order — ৳${cart.total.toFixed(0)}`}
                 </Button>
               </form>
             </Form>
@@ -225,7 +225,7 @@ export default function Checkout() {
                       <p className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Black / {item.size}</p>
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-zinc-400">QTY: {item.quantity}</span>
-                        <span className="font-black text-[#e63329]">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-black text-[#e63329]">৳{(item.price * item.quantity).toFixed(0)}</span>
                       </div>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function Checkout() {
               <div className="space-y-4 text-sm mb-6 font-bold uppercase tracking-wider border-b-2 border-[#1f1f1f] pb-6">
                 <div className="flex justify-between text-zinc-400">
                   <span>Subtotal</span>
-                  <span className="text-white">${cart.total.toFixed(2)}</span>
+                  <span className="text-white">৳{cart.total.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-zinc-400">
                   <span>Shipping</span>
@@ -245,7 +245,7 @@ export default function Checkout() {
               
               <div className="flex justify-between items-end">
                 <span className="font-black uppercase tracking-widest text-zinc-400">Total</span>
-                <span className="font-display text-4xl font-black text-white">${cart.total.toFixed(2)}</span>
+                <span className="font-display text-4xl font-black text-white">৳{cart.total.toFixed(0)}</span>
               </div>
             </div>
           </div>
