@@ -18,6 +18,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const db = getDb();
 
+  // GET /api/orders?id=X
+  if (req.method === "GET") {
+    try {
+      const id = parseInt(req.query.id as string);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid order ID" });
+
+      const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, id));
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      return res.json(formatOrder(order));
+    } catch (err) {
+      console.error("Failed to get order", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  // POST /api/orders
   if (req.method === "POST") {
     try {
       const { customerName, email, address, city, country, zipCode, items } = req.body;
