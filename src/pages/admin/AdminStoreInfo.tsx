@@ -15,6 +15,7 @@ interface StoreInfo {
   siPolicyPayment: string;
   siHeroTitle: string;
   siHeroSubtitle: string;
+  bdcourierApiKey?: string;
 }
 
 const EMPTY: StoreInfo = {
@@ -29,6 +30,7 @@ const EMPTY: StoreInfo = {
   siPolicyPayment: "",
   siHeroTitle: "",
   siHeroSubtitle: "",
+  bdcourierApiKey: "",
 };
 
 const AI_INPUT = "w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all";
@@ -174,6 +176,17 @@ export default function AdminStoreInfo() {
                   <textarea rows={4} value={info.siHeroSubtitle} onChange={e => set("siHeroSubtitle")(e.target.value)} placeholder="Premium streetwear that hits different..."
                     className={`${AI_INPUT} resize-none`} style={{ background: "rgba(255,23,68,0.04)", border: "1px solid rgba(255,23,68,0.15)" }} />
                 </div>
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Integrations */}
+          <div className="md:col-span-2">
+            <SectionCard id="integrations" title="API Integrations" color="#3b82f6" icon={<FileText className="w-4 h-4" style={{ color: "#3b82f6" }} />}
+              onSave={() => save("integrations", ["bdcourierApiKey"])}
+              saving={savingId === "integrations"} saved={savedId === "integrations"}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field label="BD Courier / Fraud Check API Key" value={info.bdcourierApiKey || ""} onChange={set("bdcourierApiKey")} placeholder="e.g. GHOJIzF5vh3RY..." hint="Used for customer fraud checking in Orders" />
               </div>
             </SectionCard>
           </div>
