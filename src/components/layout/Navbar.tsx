@@ -12,7 +12,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full navbar-gradient-border relative" style={{ background: "rgba(5,5,8,0.88)", backdropFilter: "blur(20px)" }}>
       <div className="container flex h-18 items-center justify-between px-4 md:px-8 py-4">
         <Link href="/" className="flex items-center gap-3 group">
-          <img src="/logo.png" alt="Be Simple 75" className="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110" style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.6)) brightness(1.2)" }} />
+          <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.8)) brightness(1.4)" }} />
           <div className="flex flex-col -gap-1">
             <span className="font-black text-xl uppercase tracking-wider text-white">Be Simple</span>
             <span className="text-[10px] font-black tracking-[0.3em] text-rose-500 -mt-1">PREMIUM STORE</span>

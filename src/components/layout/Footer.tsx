@@ -14,7 +14,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 8px rgba(255,255,255,0.6)) brightness(1.2)" }} />
+              <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.8)) brightness(1.4)" }} />
               <div>
                 <span className="font-black text-2xl uppercase tracking-wider text-white">Be Simple 75</span>
                 <p className="text-[9px] font-black tracking-[0.4em] text-rose-500 uppercase -mt-1">Streetwear Bangladesh</p>

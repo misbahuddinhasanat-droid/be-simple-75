@@ -33,6 +33,10 @@ export default function ProductDetail() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("sticky-bar", { detail: showSticky }));
+  }, [showSticky]);
+
   useSEO(product ? {
     title: `${product.name} — ৳${product.price.toFixed(0)} Streetwear Tee`,
     description: `${product.name} — Be Simple 75. Only ৳${product.price.toFixed(0)}. Fast delivery all over Bangladesh.`,
@@ -151,7 +155,7 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai w-full h-14 rounded-xl text-sm flex items-center justify-center gap-3 disabled:opacity-60">
+              <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai w-full h-14 rounded-xl text-sm flex items-center justify-center gap-3 disabled:opacity-60 animate-attention">
                 <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   {isBuyingNow ? "Processing..." : <><Zap className="w-5 h-5" fill="currentColor" />Buy Now — ৳{((product.salePrice || product.price) * quantity).toFixed(0)}</>}
                 </span>
@@ -185,7 +189,7 @@ export default function ProductDetail() {
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total</span>
             <span className="text-lg font-black gradient-text-red-orange">৳{((product.salePrice || product.price) * quantity).toFixed(0)}</span>
           </div>
-          <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai h-12 flex-1 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-60">
+          <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai h-12 flex-1 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-60 animate-attention">
             <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               {isBuyingNow ? "Processing..." : <><Zap className="w-4 h-4" fill="currentColor" />Buy Now</>}
             </span>
