@@ -5,7 +5,7 @@ import {
   Shield, ShieldCheck, ShieldX, Loader2, AlertTriangle, Zap,
 } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 const STATUSES = ["all", "new", "called", "converted", "not_interested"];
 
 const STATUS_META: Record<string, { label: string; dot: string; bg: string }> = {

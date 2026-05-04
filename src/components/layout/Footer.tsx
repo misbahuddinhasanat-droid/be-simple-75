@@ -40,7 +40,7 @@ export function Footer() {
           <div>
             <h4 className="text-xs font-black mb-5 uppercase tracking-widest text-slate-400">Shop</h4>
             <ul className="space-y-3 text-sm font-medium">
-              {[{ href: "/products", label: "All Products" }, { href: "/customize", label: "The Studio" }, { href: "/design-templates", label: "Templates" }].map(({ href, label }) => (
+              {[{ href: "/products", label: "All Products" }, { href: "/customize", label: "The Studio" }, { href: "/dashboard", label: "Account Dashboard" }, { href: "/track-order", label: "Track Order" }].map(({ href, label }) => (
                 <li key={href}><Link href={href} className="text-slate-500 hover:text-white transition-colors duration-200">{label}</Link></li>
               ))}
             </ul>

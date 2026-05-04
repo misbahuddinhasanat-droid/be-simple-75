@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Tag, Plus, Trash2, RefreshCw, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 interface Category {
   id: number;

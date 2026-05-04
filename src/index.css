@@ -145,26 +145,33 @@
   transition: opacity 0.25s ease;
 }
 .btn-ai:hover::after { opacity: 1; }
-.btn-ai:hover { box-shadow: 0 0 30px rgba(255,23,68,0.6); }
+.btn-ai:hover { 
+  box-shadow: 0 0 40px rgba(255,23,68,0.4), inset 0 0 15px rgba(255,255,255,0.2); 
+  transform: translateY(-2px) scale(1.02);
+}
+.btn-ai:active { transform: translateY(0) scale(0.98); }
 .btn-ai > * { position: relative; z-index: 1; }
 .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-ai-outline {
-  background: transparent;
-  border: 1px solid rgba(255, 23, 68, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+  backdrop-filter: blur(10px);
   color: #ff1744;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
 }
 .btn-ai-outline:hover {
   border-color: #ff1744;
   background: rgba(255, 23, 68, 0.1);
-  box-shadow: 0 0 20px rgba(255, 23, 68, 0.25);
+  box-shadow: 0 0 30px rgba(255, 23, 68, 0.2);
   color: white;
+  transform: translateY(-2px);
 }
+.btn-ai-outline:active { transform: translateY(0) scale(0.98); }
 
 /* ── Orb Animations ────────────────────────────────────────── */
 @keyframes float-orb {
@@ -209,5 +216,56 @@
   50% { transform: scale(1.03); filter: brightness(1.1); box-shadow: 0 0 25px rgba(255,23,68,0.4); }
 }
 .animate-attention {
-  animation: attention 3s ease-in-out infinite;
+  animation: attention 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
+
+/* ── Adventure Flow ────────────────────────────────────────── */
+@keyframes mesh-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.adventure-bg {
+  background: linear-gradient(-45deg, #050508, #0a0a0f, #050508, #110508);
+  background-size: 400% 400%;
+  animation: mesh-gradient 15s ease infinite;
+}
+
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.touch-ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% { transform: scale(0, 0); opacity: 0.5; }
+  20% { transform: scale(25, 25); opacity: 0.3; }
+  100% { opacity: 0; transform: scale(40, 40); }
+}
+
+.touch-ripple:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* ── Magnetic Movement ─────────────────────────────────────── */
+.magnetic {
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.magnetic:hover {
+  transform: scale(1.05) translateY(-2px);
+}
+

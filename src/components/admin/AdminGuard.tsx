@@ -6,13 +6,13 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const key = localStorage.getItem("admin_auth");
-    if (key !== "besimple2024") {
+    if (key !== "Besimple90@@") {
       setLocation("/admin/login");
     }
   }, [setLocation]);
 
   const key = localStorage.getItem("admin_auth");
-  if (key !== "besimple2024") return null;
+  if (key !== "Besimple90@@") return null;
 
   return <>{children}</>;
 }

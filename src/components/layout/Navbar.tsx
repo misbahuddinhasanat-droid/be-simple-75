@@ -1,10 +1,12 @@
 import { Link } from "wouter";
-import { ShoppingBag, Menu, X, Flame } from "lucide-react";
+import { ShoppingBag, Menu, X, Flame, User, Heart, LayoutDashboard, Truck } from "lucide-react";
 import { useGetCart } from "@/lib/cart-store";
+import { useAuthStore } from "@/lib/auth-store";
 import { useState } from "react";
 
 export function Navbar() {
   const { data: cart } = useGetCart();
+  const { user, token } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const itemCount = cart?.itemCount || 0;
 
@@ -12,16 +14,16 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full navbar-gradient-border relative" style={{ background: "rgba(5,5,8,0.88)", backdropFilter: "blur(20px)" }}>
       <div className="container flex h-18 items-center justify-between px-4 md:px-8 py-4">
         <Link href="/" className="flex items-center gap-3 group">
-          <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.8)) brightness(1.4)" }} />
-          <div className="flex flex-col -gap-1">
+          <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 16px rgba(255,255,255,0.9)) brightness(1.6)" }} />
+          <div className="flex flex-col -gap-1 hidden xs:flex">
             <span className="font-black text-xl uppercase tracking-wider text-white">Be Simple</span>
             <span className="text-[10px] font-black tracking-[0.3em] text-rose-500 -mt-1">PREMIUM STORE</span>
           </div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest">
-          {[{ href: "/products", label: "Shop All" }, { href: "/customize", label: "Studio" }, { href: "/design-templates", label: "Templates" }].map(({ href, label }) => (
-            <Link key={href} href={href} className="text-slate-400 hover:text-white transition-all duration-200 relative group">
+          {[{ href: "/products", label: "Shop All" }, { href: "/customize", label: "Studio" }, { href: "/track-order", label: "Track Order" }].map(({ href, label }) => (
+            <Link key={href} href={href} className={`${href === '/track-order' ? 'text-rose-500' : 'text-slate-400'} hover:text-white transition-all duration-200 relative group`}>
               {label}
               <span className="absolute -bottom-1 left-0 w-0 h-px group-hover:w-full transition-all duration-300" style={{ background: "linear-gradient(90deg, #ff1744, #ff4500)" }} />
             </Link>
@@ -35,13 +37,31 @@ export function Navbar() {
           </div>
 
           <Link href="/cart">
-            <button className="relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-105" style={{ background: itemCount > 0 ? "rgba(255,23,68,0.15)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,23,68,0.2)" }}>
+            <button className="relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-105 touch-ripple magnetic" style={{ background: itemCount > 0 ? "rgba(255,23,68,0.15)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,23,68,0.2)" }}>
               <ShoppingBag className="h-5 w-5 text-white" />
               {itemCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black text-white" style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)" }}>
                   {itemCount}
                 </span>
               )}
+            </button>
+          </Link>
+
+          <Link href="/track-order">
+            <button className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-105 bg-white/5 border border-white/10 text-slate-400 hover:text-white touch-ripple magnetic">
+              <Truck className="h-5 w-5" />
+            </button>
+          </Link>
+
+          <Link href="/wishlist">
+            <button className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-105 bg-white/5 border border-white/10 touch-ripple magnetic">
+              <Heart className="h-5 w-5 text-white" />
+            </button>
+          </Link>
+
+          <Link href={token ? "/dashboard" : "/login"}>
+            <button className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-105 touch-ripple magnetic" style={{ background: token ? "rgba(255,23,68,0.1)" : "rgba(255,255,255,0.05)", border: "1px solid rgba(255,23,68,0.2)" }}>
+              {token ? <LayoutDashboard className="h-5 w-5 text-rose-500" /> : <User className="h-5 w-5 text-white" />}
             </button>
           </Link>
 
@@ -53,8 +73,8 @@ export function Navbar() {
 
       {isOpen && (
         <div className="md:hidden py-6 px-6 flex flex-col gap-5" style={{ borderTop: "1px solid rgba(255,23,68,0.15)", background: "rgba(5,5,8,0.98)" }}>
-          {[{ href: "/products", label: "Shop All" }, { href: "/customize", label: "Studio" }, { href: "/design-templates", label: "Templates" }].map(({ href, label }) => (
-            <Link key={href} href={href} onClick={() => setIsOpen(false)} className="text-xl font-black uppercase tracking-widest text-white">{label}</Link>
+          {[{ href: "/products", label: "Shop All" }, { href: "/customize", label: "Studio" }, { href: "/track-order", label: "Track Order" }, { href: "/wishlist", label: "Wishlist" }, { href: token ? "/dashboard" : "/login", label: token ? "Dashboard" : "Login / Register" }].map(({ href, label }) => (
+            <Link key={href} href={href} onClick={() => setIsOpen(false)} className={`text-xl font-black uppercase tracking-widest ${href === '/track-order' ? 'text-rose-500' : 'text-white'}`}>{label}</Link>
           ))}
         </div>
       )}

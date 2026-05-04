@@ -39,7 +39,7 @@ export default function Home() {
     <div style={{ background: "#050508", color: "#f5f6fa" }}>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden adventure-bg">
         {/* Orbs */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/6 w-[500px] h-[500px] rounded-full blur-3xl orb-red" style={{ background: "radial-gradient(circle, rgba(255,23,68,0.22) 0%, transparent 70%)" }} />
@@ -50,11 +50,19 @@ export default function Home() {
         {/* Grid lines */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.025]" style={{ backgroundImage: "linear-gradient(rgba(255,23,68,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,23,68,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
-        {/* Product image */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none overflow-hidden">
-          <img src="/products/berserk-back.jpg" alt="Hero" className="w-full h-full object-cover opacity-15 scale-110" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, #050508 0%, rgba(5,5,8,0.4) 40%, transparent 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, #050508 0%, transparent 20%, transparent 80%, #050508 100%)" }} />
+        {/* Video background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-20 scale-105"
+          >
+            <source src="https://cdn.pixabay.com/video/2021/04/12/70860-537446340_large.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, #050508 0%, rgba(5,5,8,0.6) 50%, transparent 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(circle at right, transparent 0%, #050508 100%)", opacity: 0.8 }} />
         </div>
 
         <div className="container relative z-10 px-4 md:px-8 py-20">
@@ -78,7 +86,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/products">
-              <button className="btn-ai flex items-center justify-center gap-2.5 h-14 px-8 rounded-xl text-sm">
+              <button className="btn-ai flex items-center justify-center gap-2.5 h-14 px-8 rounded-xl text-sm touch-ripple magnetic">
                 <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <Zap className="w-4 h-4" fill="currentColor" />
                   Shop The Drop
@@ -86,7 +94,7 @@ export default function Home() {
               </button>
             </Link>
             <Link href="/customize">
-              <button className="btn-ai-outline flex items-center justify-center gap-2 h-14 px-8 rounded-xl text-sm">
+              <button className="btn-ai-outline flex items-center justify-center gap-2 h-14 px-8 rounded-xl text-sm touch-ripple magnetic">
                 <div className="w-5 h-5 rounded overflow-hidden bg-white/10 flex items-center justify-center">
                   <img src="/logo.png" alt="" className="w-full h-full object-contain" />
                 </div>
@@ -246,6 +254,37 @@ export default function Home() {
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" style={{ filter: "invert(1)" }} />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────── */}
+      <section className="py-24" style={{ background: "rgba(5,5,8,0.6)" }}>
+        <div className="container px-4 md:px-8 max-w-4xl">
+          <div className="text-center mb-16">
+            <p className="text-[11px] font-black uppercase tracking-widest mb-3" style={{ color: "#ff1744" }}>Got Questions?</p>
+            <h2 className="font-black text-4xl md:text-6xl uppercase tracking-tighter text-white">Frequently Asked <span className="gradient-text">Questions</span></h2>
+          </div>
+          <div className="space-y-4">
+            {[
+              { q: "How long does delivery take?", a: "Inside Dhaka, we deliver within 24-48 hours. Outside Dhaka, it usually takes 3-5 business days via our courier partners." },
+              { q: "Do you have a return policy?", a: "Yes! We offer a 7-day exchange policy for size issues or manufacturing defects. Items must be unworn and in original packaging." },
+              { q: "How can I track my order?", a: "Once your order is confirmed, you can track it in your Customer Dashboard or contact our AI Support for real-time updates." },
+              { q: "Is the print quality permanent?", a: "We use high-grade screen and DTF printing that is built to last through hundreds of washes without fading or cracking." },
+              { q: "Do you take custom orders?", a: "Absolutely! Head over to our 'Studio' section to upload your own design and create your custom streetwear." }
+            ].map((faq, i) => (
+              <details key={i} className="group rounded-2xl transition-all duration-300 overflow-hidden" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.1)" }}>
+                <summary className="flex items-center justify-between p-6 cursor-pointer list-none list-inside">
+                  <h3 className="text-sm font-bold uppercase tracking-wide text-white group-hover:text-rose-400 transition-colors">{faq.q}</h3>
+                  <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center transition-transform duration-300 group-open:rotate-180">
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-500 rotate-90" />
+                  </div>
+                </summary>
+                <div className="px-6 pb-6 pt-2">
+                  <p className="text-slate-400 text-sm leading-relaxed">{faq.a}</p>
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>

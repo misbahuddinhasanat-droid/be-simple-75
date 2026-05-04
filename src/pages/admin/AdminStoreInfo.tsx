@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Save, Check, Phone, Instagram, Facebook, Mail, FileText } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 interface StoreInfo {
   siWhatsappNumber: string;
@@ -16,6 +16,8 @@ interface StoreInfo {
   siHeroTitle: string;
   siHeroSubtitle: string;
   bdcourierApiKey?: string;
+  siAiKnowledgeBase?: string;
+  siMessengerUrl?: string;
 }
 
 const EMPTY: StoreInfo = {
@@ -31,6 +33,8 @@ const EMPTY: StoreInfo = {
   siHeroTitle: "",
   siHeroSubtitle: "",
   bdcourierApiKey: "",
+  siAiKnowledgeBase: "",
+  siMessengerUrl: "",
 };
 
 const AI_INPUT = "w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all";
@@ -182,11 +186,22 @@ export default function AdminStoreInfo() {
 
           {/* Integrations */}
           <div className="md:col-span-2">
-            <SectionCard id="integrations" title="API Integrations" color="#3b82f6" icon={<FileText className="w-4 h-4" style={{ color: "#3b82f6" }} />}
-              onSave={() => save("integrations", ["bdcourierApiKey"])}
+            <SectionCard id="integrations" title="API & AI Integrations" color="#3b82f6" icon={<FileText className="w-4 h-4" style={{ color: "#3b82f6" }} />}
+              onSave={() => save("integrations", ["bdcourierApiKey", "siAiKnowledgeBase", "siMessengerUrl"])}
               saving={savingId === "integrations"} saved={savedId === "integrations"}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Field label="BD Courier / Fraud Check API Key" value={info.bdcourierApiKey || ""} onChange={set("bdcourierApiKey")} placeholder="e.g. GHOJIzF5vh3RY..." hint="Used for customer fraud checking in Orders" />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Field label="BD Courier API Key" value={info.bdcourierApiKey || ""} onChange={set("bdcourierApiKey")} placeholder="e.g. GHOJIzF5vh3RY..." />
+                  <Field label="FB Messenger URL" value={info.siMessengerUrl || ""} onChange={set("siMessengerUrl")} placeholder="e.g. m.me/besimple75" />
+                </div>
+                <div>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">AI Agent Training Data (Knowledge Base)</h3>
+                  <textarea value={info.siAiKnowledgeBase || ""} onChange={e => set("siAiKnowledgeBase")(e.target.value)}
+                    className="w-full h-48 px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all"
+                    style={{ background: "rgba(59,130,246,0.04)", border: "1px solid rgba(59,130,246,0.15)" }}
+                    placeholder="Paste your store policies, shipping info, FAQs, and product details here for the AI to learn..." />
+                  <p className="text-[9px] text-slate-600 mt-1 uppercase font-bold tracking-tighter">This data is used by the AI Agent to answer customer queries.</p>
+                </div>
               </div>
             </SectionCard>
           </div>

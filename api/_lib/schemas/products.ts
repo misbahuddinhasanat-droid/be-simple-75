@@ -15,6 +15,8 @@ export const productsTable = pgTable("products", {
   featured: boolean("featured").notNull().default(false),
   stock: integer("stock").notNull().default(100),
   sku: text("sku"),
+  deliveryMessage: text("delivery_message"),
+  specialOffer: text("special_offer"),
   customAttributes: jsonb("custom_attributes"),
 });
 

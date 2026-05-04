@@ -19,6 +19,12 @@ import NotFound from "@/pages/not-found";
 import Contact from "@/pages/Contact";
 import ReturnPolicy from "@/pages/ReturnPolicy";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
+import Wishlist from "@/pages/Wishlist";
+import TrackOrder from "@/pages/TrackOrder";
+import FAQ from "@/pages/FAQ";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -97,6 +103,12 @@ function Router() {
             <Route path="/contact" component={Contact} />
             <Route path="/returns" component={ReturnPolicy} />
             <Route path="/privacy" component={PrivacyPolicy} />
+            <Route path="/login" component={Login} />
+            <Route path="/register" component={Register} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/wishlist" component={Wishlist} />
+            <Route path="/track-order" component={TrackOrder} />
+            <Route path="/faq" component={FAQ} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

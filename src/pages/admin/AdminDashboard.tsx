@@ -6,7 +6,7 @@ import {
   Users, RefreshCw, Zap,
 } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 const STATUS_CFG: Record<string, { label: string; dot: string; bg: string }> = {
   confirmed:  { label: "Confirmed",  dot: "#60a5fa", bg: "rgba(96,165,250,0.1)" },

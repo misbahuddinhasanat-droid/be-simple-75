@@ -4,7 +4,7 @@ import { Package, Star, Check, X, Pencil, RefreshCw, Zap, Search, Plus, Image as
 import { AnimatePresence, motion } from "framer-motion";
 import { applyFilters } from "@/lib/plugin-system";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 interface Product {
   id: number; name: string; description: string; shortDescription?: string | null; 
@@ -13,6 +13,8 @@ interface Product {
   category: string; sizes: string[]; colors: string[];
   featured: boolean; stock: number;
   sku?: string | null;
+  deliveryMessage?: string | null;
+  specialOffer?: string | null;
   customAttributes?: Record<string, any>;
 }
 
@@ -39,7 +41,9 @@ function ProductEditor({
     name: "", description: "", shortDescription: "", price: 0, salePrice: null,
     imageUrl: "", gallery: [], category: "T-Shirt",
     sizes: ["S", "M", "L", "XL", "XXL"], colors: ["White", "Black"],
-    featured: false, stock: 100, sku: "", customAttributes: {}
+    featured: false, stock: 100, sku: "", 
+    deliveryMessage: "", specialOffer: "",
+    customAttributes: {}
   });
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -238,6 +242,21 @@ function ProductEditor({
               <textarea value={formData.description || ""} onChange={e => setFormData({ ...formData, description: e.target.value })}
                 rows={4} placeholder="Premium oversized fit..." className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50 resize-none"
                 style={AI_INPUT_STYLE} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Delivery Message (Overrides Global)</label>
+                <input value={formData.deliveryMessage || ""} onChange={e => setFormData({ ...formData, deliveryMessage: e.target.value })}
+                  placeholder="E.g. Express Dhaka Delivery..." className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
+                  style={AI_INPUT_STYLE} />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Special Offer / Badge</label>
+                <input value={formData.specialOffer || ""} onChange={e => setFormData({ ...formData, specialOffer: e.target.value })}
+                  placeholder="E.g. Buy 2 Get 1 Free..." className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
+                  style={AI_INPUT_STYLE} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6">

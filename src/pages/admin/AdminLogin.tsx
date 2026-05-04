@@ -17,7 +17,7 @@ export default function AdminLogin() {
     setError("");
     setTimeout(() => {
       if (password === CORRECT_PASSWORD) {
-        localStorage.setItem("admin_auth", "besimple2024");
+        localStorage.setItem("admin_auth", "Besimple90@@");
         setLocation("/admin/dashboard");
       } else {
         setError("Incorrect password. Access denied.");

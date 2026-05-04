@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Save, Check, Eye, EyeOff, Zap, Tag, Truck, CreditCard, Bell, BarChart3, ExternalLink } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 interface Settings {
   gtmId: string; pixelId: string; tiktokPixelId: string; ga4MeasurementId: string;

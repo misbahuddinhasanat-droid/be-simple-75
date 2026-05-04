@@ -35,6 +35,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         siPolicyPayment: map["si_policy_payment"] ?? "",
         siHeroTitle: map["si_hero_title"] ?? "",
         siHeroSubtitle: map["si_hero_subtitle"] ?? "",
+        siAiKnowledgeBase: map["si_ai_knowledge_base"] ?? "",
+        siMessengerUrl: map["si_messenger_url"] ?? "",
       });
     } catch (err) {
       console.error("Failed to get admin settings", err);
@@ -57,6 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         siPolicyReturn: "si_policy_return", siPolicyDelivery: "si_policy_delivery",
         siPolicyPayment: "si_policy_payment",
         siHeroTitle: "si_hero_title", siHeroSubtitle: "si_hero_subtitle",
+        siAiKnowledgeBase: "si_ai_knowledge_base", siMessengerUrl: "si_messenger_url",
       };
       for (const [bodyKey, dbKey] of Object.entries(keyMap)) {
         if (body[bodyKey] !== undefined) {

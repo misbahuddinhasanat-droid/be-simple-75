@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, Fragment } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ShoppingCart, ChevronDown, Search, RefreshCw, Package, MapPin, Phone, Zap } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 const STATUSES = ["all", "confirmed", "processing", "shipped", "delivered", "cancelled"];
 
 const STATUS_CFG: Record<string, { label: string; dot: string; bg: string }> = {

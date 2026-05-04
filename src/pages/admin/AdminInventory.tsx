@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Package, RefreshCw, Search, Save, AlertCircle } from "lucide-react";
 
-const ADMIN_KEY = "besimple2024";
+const ADMIN_KEY = "Besimple90@@";
 
 interface Product {
   id: number;
