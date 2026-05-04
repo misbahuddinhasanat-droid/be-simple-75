@@ -2,6 +2,7 @@
   "name": "besimple75",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "build": "vite build --config vite.config.ts",
