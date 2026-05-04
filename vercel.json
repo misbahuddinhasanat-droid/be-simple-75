@@ -2,6 +2,11 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.ts": {
+      "includeFiles": "api/_lib/**"
+    }
+  },
   "rewrites": [
     { "source": "/api/products/featured", "destination": "/api/products?featured=true" },
     { "source": "/api/products/:id", "destination": "/api/products?id=:id" },
