@@ -13,7 +13,7 @@ export const productsTable = pgTable("products", {
   colors: jsonb("colors").notNull().default(["White", "Black", "Gray"]),
   featured: boolean("featured").notNull().default(false),
   stock: integer("stock").notNull().default(100),
-  customAttributes: jsonb("custom_attributes").default({}),
+  customAttributes: jsonb("custom_attributes"),
 });
 
 export type InsertProduct = typeof productsTable.$inferInsert;
