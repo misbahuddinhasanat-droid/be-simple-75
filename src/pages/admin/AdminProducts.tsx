@@ -12,7 +12,14 @@ interface Product {
   imageUrl: string; gallery: string[];
   category: string; sizes: string[]; colors: string[];
   featured: boolean; stock: number;
+  sku?: string | null;
   customAttributes?: Record<string, any>;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
 }
 
 const AI_INPUT_STYLE = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0" };
@@ -32,8 +39,15 @@ function ProductEditor({
     name: "", description: "", shortDescription: "", price: 0, salePrice: null,
     imageUrl: "", gallery: [], category: "T-Shirt",
     sizes: ["S", "M", "L", "XL", "XXL"], colors: ["White", "Black"],
-    featured: false, stock: 100, customAttributes: {}
+    featured: false, stock: 100, sku: "", customAttributes: {}
   });
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/categories", { headers: { "X-Admin-Key": ADMIN_KEY } })
+      .then(res => res.json())
+      .then(data => setCategories(Array.isArray(data) ? data : []));
+  }, []);
   const [galleryUrlInput, setGalleryUrlInput] = useState("");
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -187,11 +201,19 @@ function ProductEditor({
               </div>
             </div>
             
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Stock Inventory</label>
-              <input type="number" value={formData.stock ?? 100} onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                className="w-full px-3 py-2.5 rounded-xl text-lg font-black outline-none focus:border-rose-500/50"
-                style={AI_INPUT_STYLE} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Stock Inventory</label>
+                <input type="number" value={formData.stock ?? 100} onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                  className="w-full px-3 py-2.5 rounded-xl text-lg font-black outline-none focus:border-rose-500/50"
+                  style={AI_INPUT_STYLE} />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">SKU / Code</label>
+                <input value={formData.sku || ""} onChange={e => setFormData({ ...formData, sku: e.target.value })}
+                  placeholder="E.g. TS-001" className="w-full px-3 py-2.5 rounded-xl text-lg font-black outline-none focus:border-rose-500/50 uppercase"
+                  style={AI_INPUT_STYLE} />
+              </div>
             </div>
           </div>
 
@@ -259,9 +281,20 @@ function ProductEditor({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Category</label>
-                <input value={formData.category || ""} onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="E.g. Anime, Street" className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
-                  style={AI_INPUT_STYLE} />
+                <select 
+                  value={formData.category || ""} 
+                  onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50 appearance-none bg-[#0f172a]"
+                  style={AI_INPUT_STYLE}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                  {!categories.some(c => c.name === formData.category) && formData.category && (
+                    <option value={formData.category}>{formData.category}</option>
+                  )}
+                </select>
               </div>
               <div className="flex items-end">
                 <button type="button" onClick={() => setFormData({ ...formData, featured: !formData.featured })}
@@ -331,7 +364,7 @@ export default function AdminProducts() {
     try {
       if (data.id) {
         // Update
-        const res = await fetch(`/api/admin/products/${data.id}`, { 
+        const res = await fetch(`/api/admin/products?id=${data.id}`, { 
           method: "PATCH", headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY }, 
           body: JSON.stringify(data) 
         });
@@ -352,14 +385,17 @@ export default function AdminProducts() {
           setEditingProduct(null);
         }
       }
-    } catch { /* silent */ }
+    } catch (err) { 
+      console.error("Save error:", err);
+      alert("Failed to save product. Check console for details.");
+    }
     setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE", headers: { "X-Admin-Key": ADMIN_KEY } });
+      const res = await fetch(`/api/admin/products?id=${id}`, { method: "DELETE", headers: { "X-Admin-Key": ADMIN_KEY } });
       if (res.ok) {
         setProducts(prev => prev.filter(p => p.id !== id));
       }
@@ -369,7 +405,7 @@ export default function AdminProducts() {
   const toggleFeatured = async (product: Product) => {
     const newFeatured = !product.featured;
     try {
-      await fetch(`/api/admin/products/${product.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY }, body: JSON.stringify({ featured: newFeatured }) });
+      await fetch(`/api/admin/products?id=${product.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY }, body: JSON.stringify({ featured: newFeatured }) });
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, featured: newFeatured } : p));
     } catch { /* silent */ }
   };
@@ -491,9 +527,14 @@ export default function AdminProducts() {
                   </p>
 
                   <div className="flex items-center justify-between pt-4 mt-auto border-t border-white/5">
-                    <div className="flex items-center gap-1.5" style={{ color: product.stock > 0 ? "#34d399" : "#f87171" }}>
-                      <Zap className="w-3.5 h-3.5" fill="currentColor" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{product.stock > 0 ? `${product.stock} In Stock` : "Out of Stock"}</span>
+                    <div className="flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-1.5" style={{ color: product.stock > 0 ? "#34d399" : "#f87171" }}>
+                        <Zap className="w-3.5 h-3.5" fill="currentColor" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{product.stock > 0 ? `${product.stock} In Stock` : "Out of Stock"}</span>
+                      </div>
+                      {product.sku && (
+                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-600">SKU: {product.sku}</span>
+                      )}
                     </div>
                     <button onClick={() => setEditingProduct(product)} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 transition-colors">
                       <Pencil className="w-3 h-3" /> Edit

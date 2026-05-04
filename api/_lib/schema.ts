@@ -8,3 +8,5 @@ export { settingsTable } from "./schemas/settings.js";
 export type { Setting } from "./schemas/settings.js";
 export { uploadsTable } from "./schemas/uploads.js";
 export type { Upload } from "./schemas/uploads.js";
+export { categoriesTable } from "./schemas/categories.js";
+export type { Category, InsertCategory } from "./schemas/categories.js";

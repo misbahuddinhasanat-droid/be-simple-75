@@ -43,7 +43,9 @@ export default function Home() {
 
         <div className="container relative z-10 px-4 md:px-8 py-20">
           <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest" style={{ background: "rgba(255,23,68,0.1)", border: "1px solid rgba(255,23,68,0.3)", color: "#ff1744" }}>
-            <Flame className="w-3.5 h-3.5" />
+            <div className="w-4 h-4 rounded overflow-hidden bg-white/10 flex items-center justify-center">
+              <img src="/logo.png" alt="" className="w-full h-full object-contain" />
+            </div>
             New Drop 2026 — Bangladesh Exclusive
           </div>
 
@@ -70,7 +72,9 @@ export default function Home() {
             </Link>
             <Link href="/customize">
               <button className="btn-ai-outline flex items-center justify-center gap-2 h-14 px-8 rounded-xl text-sm">
-                <Flame className="w-4 h-4" />
+                <div className="w-5 h-5 rounded overflow-hidden bg-white/10 flex items-center justify-center">
+                  <img src="/logo.png" alt="" className="w-full h-full object-contain" />
+                </div>
                 Enter Studio
               </button>
             </Link>

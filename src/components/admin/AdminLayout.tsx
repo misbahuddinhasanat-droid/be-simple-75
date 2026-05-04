@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Users, Package, Settings, Store,
-  LogOut, ExternalLink, Menu, X, Flame, ChevronRight, Zap,
+  LogOut, ExternalLink, Menu, X, Flame, ChevronRight, Zap, Tag
 } from "lucide-react";
 
 interface AdminLayoutProps { children: React.ReactNode; }
@@ -12,6 +12,8 @@ const NAV = [
   { section: "STORE", items: [
     { href: "/admin/orders",   icon: ShoppingCart, label: "Orders" },
     { href: "/admin/products", icon: Package,      label: "Products" },
+    { href: "/admin/categories", icon: Tag,      label: "Categories" },
+    { href: "/admin/inventory", icon: Zap,      label: "Inventory" },
     { href: "/admin/leads",    icon: Users,         label: "Leads & COD" },
   ]},
   { section: "CONFIGURATION", items: [
@@ -31,9 +33,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Logo */}
       <div className="p-5" style={{ borderBottom: "1px solid rgba(255,23,68,0.12)" }}>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", boxShadow: "0 0 24px rgba(255,23,68,0.45)" }}>
-            <Flame className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white/5 border border-white/10">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
           </div>
           <div>
             <p className="font-black text-sm uppercase tracking-widest gradient-text-red-orange leading-tight">Be Simple 75</p>

@@ -10,6 +10,7 @@ interface Settings {
   steadfastApiKey: string; steadfastSecretKey: string; oneclickApiKey: string;
   uddoktapayApiKey: string; uddoktapayApiSecret: string; sslcommerzStoreId: string; sslcommerzPassword: string; bkashApiKey: string;
   whatsappNumber: string; smsApiKey: string;
+  instagramUrl: string; facebookUrl: string; twitterUrl: string; tiktokUrl: string;
 }
 
 const EMPTY: Settings = {
@@ -18,6 +19,7 @@ const EMPTY: Settings = {
   steadfastApiKey: "", steadfastSecretKey: "", oneclickApiKey: "",
   uddoktapayApiKey: "", uddoktapayApiSecret: "", sslcommerzStoreId: "", sslcommerzPassword: "", bkashApiKey: "",
   whatsappNumber: "", smsApiKey: "",
+  instagramUrl: "", facebookUrl: "", twitterUrl: "", tiktokUrl: "",
 };
 
 const AI_INPUT = "w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all";
@@ -166,6 +168,19 @@ export default function AdminSettings() {
       cards: [
         { id: "whatsapp", name: "WhatsApp Business", description: "Customer Notifications", color: "#25d366", fields: [{ label: "WhatsApp Number", key: "whatsappNumber" as keyof Settings, placeholder: "+880 1XXXXXXXXX" }] },
         { id: "sms", name: "SMS Gateway", description: "BD SMS API Integration", color: "#f59e0b", fields: [{ label: "SMS API Key", key: "smsApiKey" as keyof Settings, secret: true, placeholder: "sms_key_..." }] },
+      ],
+    },
+    {
+      section: "Social Media Links",
+      sectionIcon: ExternalLink,
+      sectionColor: "#ff1744",
+      cards: [
+        { id: "socials", name: "Official Socials", description: "Public links in footer", color: "#ff1744", fields: [
+          { label: "Instagram URL", key: "instagramUrl" as keyof Settings, placeholder: "https://instagram.com/..." },
+          { label: "Facebook URL", key: "facebookUrl" as keyof Settings, placeholder: "https://facebook.com/..." },
+          { label: "Twitter URL", key: "twitterUrl" as keyof Settings, placeholder: "https://twitter.com/..." },
+          { label: "TikTok URL", key: "tiktokUrl" as keyof Settings, placeholder: "https://tiktok.com/..." },
+        ]},
       ],
     },
   ];

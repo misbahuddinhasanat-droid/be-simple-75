@@ -11,12 +11,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full navbar-gradient-border relative" style={{ background: "rgba(5,5,8,0.88)", backdropFilter: "blur(20px)" }}>
       <div className="container flex h-18 items-center justify-between px-4 md:px-8 py-4">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)" }}>
-            <Flame className="w-4 h-4 text-white" />
+        <Link href="/" className="flex items-center gap-3 group">
+          <img src="/logo.png" alt="Be Simple 75" className="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110" />
+          <div className="flex flex-col -gap-1">
+            <span className="font-black text-xl uppercase tracking-wider text-white">Be Simple</span>
+            <span className="text-[10px] font-black tracking-[0.3em] text-rose-500 -mt-1">PREMIUM STORE</span>
           </div>
-          <span className="font-black text-xl uppercase tracking-wider gradient-text-red-orange">Be Simple</span>
-          <span className="text-[10px] font-black border px-1.5 py-0.5 rounded-full tracking-widest" style={{ color: "rgba(255,23,68,0.7)", borderColor: "rgba(255,23,68,0.25)" }}>75</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest">

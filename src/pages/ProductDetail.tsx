@@ -89,7 +89,9 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex items-center gap-2 mb-8">
-              <Flame className="w-3.5 h-3.5" style={{ color: "#ff4500" }} />
+              <div className="w-4 h-4 rounded overflow-hidden flex items-center justify-center bg-white/5 border border-white/10">
+                <img src="/logo.png" alt="" className="w-full h-full object-contain" />
+              </div>
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,69,0,0.8)" }}>Free Shipping · Heavyweight Black · 300gsm Cotton</p>
             </div>
 

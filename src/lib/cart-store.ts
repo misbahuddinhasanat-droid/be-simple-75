@@ -44,6 +44,8 @@ function loadCart(): CartItem[] {
 
 function saveCart(items: CartItem[]) {
   localStorage.setItem(CART_KEY, JSON.stringify(items));
+  // Dispatch custom event for same-tab reactivity
+  window.dispatchEvent(new CustomEvent("besimple_cart_update"));
 }
 
 // ─── Query Key (matches existing imports) ────────────────────────────────────
@@ -54,10 +56,20 @@ export function useGetCart() {
   const [cart, setCart] = useState<LocalCart>(() => computeCart(loadCart()));
 
   useEffect(() => {
-    // Sync across tabs
     const sync = () => setCart(computeCart(loadCart()));
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
+    
+    // Listen for cross-tab updates
+    window.addEventListener("storage", (e) => {
+      if (e.key === CART_KEY) sync();
+    });
+
+    // Listen for same-tab updates
+    window.addEventListener("besimple_cart_update", sync);
+
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("besimple_cart_update", sync);
+    };
   }, []);
 
   return { data: cart, isLoading: false };

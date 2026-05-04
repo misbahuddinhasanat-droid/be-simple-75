@@ -16,6 +16,9 @@ import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import OrderConfirmation from "@/pages/OrderConfirmation";
 import NotFound from "@/pages/not-found";
+import Contact from "@/pages/Contact";
+import ReturnPolicy from "@/pages/ReturnPolicy";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -24,6 +27,8 @@ import AdminProducts from "@/pages/admin/AdminProducts";
 import AdminLeads from "@/pages/admin/AdminLeads";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminStoreInfo from "@/pages/admin/AdminStoreInfo";
+import AdminInventory from "@/pages/admin/AdminInventory";
+import AdminCategories from "@/pages/admin/AdminCategories";
 
 const queryClient = new QueryClient();
 
@@ -51,11 +56,20 @@ function Router() {
       <Route path="/admin/products">
         <AdminGuard><AdminProducts /></AdminGuard>
       </Route>
+      <Route path="/admin/categories">
+        <AdminGuard><AdminCategories /></AdminGuard>
+      </Route>
+      <Route path="/admin/inventory">
+        <AdminGuard><AdminInventory /></AdminGuard>
+      </Route>
       <Route path="/admin/leads">
         <AdminGuard><AdminLeads /></AdminGuard>
       </Route>
       <Route path="/admin/settings">
         <AdminGuard><AdminSettings /></AdminGuard>
+      </Route>
+      <Route path="/admin/categories">
+        <AdminGuard><AdminCategories /></AdminGuard>
       </Route>
       <Route path="/admin/store-info">
         <AdminGuard><AdminStoreInfo /></AdminGuard>
@@ -80,6 +94,9 @@ function Router() {
             <Route path="/cart" component={Cart} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-confirmation/:id" component={OrderConfirmation} />
+            <Route path="/contact" component={Contact} />
+            <Route path="/returns" component={ReturnPolicy} />
+            <Route path="/privacy" component={PrivacyPolicy} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

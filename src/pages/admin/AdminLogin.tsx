@@ -48,9 +48,9 @@ export default function AdminLogin() {
           <div className="p-8">
             {/* Logo */}
             <div className="text-center mb-8">
-              <div className="inline-flex w-16 h-16 rounded-2xl items-center justify-center mb-4"
-                style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", boxShadow: "0 0 40px rgba(255,23,68,0.4)" }}>
-                <Flame className="w-8 h-8 text-white" />
+              <div className="inline-flex w-16 h-16 rounded-2xl items-center justify-center mb-4 overflow-hidden bg-white/5 border border-white/10"
+                style={{ boxShadow: "0 0 40px rgba(255,23,68,0.2)" }}>
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-2" />
               </div>
               <h1 className="font-black text-3xl uppercase tracking-tight gradient-text-red-orange">Be Simple 75</h1>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mt-1">Admin Access</p>
