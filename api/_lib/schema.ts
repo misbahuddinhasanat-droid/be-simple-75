@@ -1,0 +1,10 @@
+export { productsTable } from "./schemas/products";
+export type { Product, InsertProduct } from "./schemas/products";
+export { ordersTable } from "./schemas/orders";
+export type { Order, InsertOrder } from "./schemas/orders";
+export { leadsTable } from "./schemas/leads";
+export type { Lead } from "./schemas/leads";
+export { settingsTable } from "./schemas/settings";
+export type { Setting } from "./schemas/settings";
+export { uploadsTable } from "./schemas/uploads";
+export type { Upload } from "./schemas/uploads";
