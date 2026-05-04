@@ -65,6 +65,16 @@ export default function Home() {
           <div className="absolute inset-0" style={{ background: "radial-gradient(circle at right, transparent 0%, #050508 100%)", opacity: 0.8 }} />
         </div>
 
+        {/* Floating Assets */}
+        <div className="absolute inset-0 pointer-events-none">
+          <motion.div animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-[15%] right-[10%] w-32 h-32 opacity-10">
+            <img src="/logo.png" alt="" className="w-full h-full object-contain filter grayscale invert" />
+          </motion.div>
+          <motion.div animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute bottom-[20%] right-[30%] w-48 h-48 opacity-5">
+            <ShoppingBag className="w-full h-full text-white" />
+          </motion.div>
+        </div>
+
         <div className="container relative z-10 px-4 md:px-8 py-20">
           <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest" style={{ background: "rgba(255,23,68,0.1)", border: "1px solid rgba(255,23,68,0.3)", color: "#ff1744" }}>
             <div className="w-4 h-4 rounded overflow-hidden bg-white/10 flex items-center justify-center">
@@ -73,11 +83,16 @@ export default function Home() {
             New Drop 2026 — Bangladesh Exclusive
           </div>
 
-          <h1 className="font-black text-7xl md:text-9xl lg:text-[130px] uppercase leading-[0.85] mb-8 tracking-tighter">
+          <motion.h1 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="font-black text-7xl md:text-9xl lg:text-[130px] uppercase leading-[0.85] mb-8 tracking-tighter italic"
+          >
             {heroTitleLines.map((line, idx) => (
               <span key={idx} className={`block ${idx === 1 ? "gradient-text" : "text-white"}`}>{line}</span>
             ))}
-          </h1>
+          </motion.h1>
 
           <p className="text-slate-400 text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed whitespace-pre-line">
             {heroSubtitle}

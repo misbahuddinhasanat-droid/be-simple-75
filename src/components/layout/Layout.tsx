@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Navbar } from "./Navbar";
@@ -14,9 +14,22 @@ import { MessengerFloat } from "../MessengerFloat";
 
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-rose-500/30 selection:text-white">
+      <div 
+        className="glow-trail hidden md:block" 
+        style={{ transform: `translate(${mousePos.x - 150}px, ${mousePos.y - 150}px)` }} 
+      />
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.main

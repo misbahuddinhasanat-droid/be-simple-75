@@ -261,11 +261,30 @@
   animation: ripple 0.6s ease-out;
 }
 
-/* ── Magnetic Movement ─────────────────────────────────────── */
-.magnetic {
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+/* ── Parallax & Float ───────────────────────────────────────── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-20px) rotate(5deg); }
 }
-.magnetic:hover {
-  transform: scale(1.05) translateY(-2px);
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.parallax-text {
+  will-change: transform;
+}
+
+.glow-trail {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,23,68,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+  mix-blend-mode: screen;
 }
 
