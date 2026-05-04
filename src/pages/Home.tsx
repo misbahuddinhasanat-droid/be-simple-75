@@ -1,9 +1,10 @@
 import { Link } from "wouter";
 import { useGetFeaturedProducts, useListProducts } from "@/lib/api";
-import { ArrowRight, Zap, Flame, ShoppingBag, Star } from "lucide-react";
+import { ArrowRight, Zap, Flame, ShoppingBag, Star, Heart, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { QuickBuyModal } from "@/components/QuickBuyModal";
 import { useSEO } from "@/hooks/useSEO";
+import { useSettings } from "@/hooks/useSettings";
 
 interface ProductForModal { id: number; name: string; price: number; imageUrl: string; sizes: string[]; }
 
@@ -11,13 +12,28 @@ export default function Home() {
   useSEO({ title: "Premium Streetwear Bangladesh", description: "Be Simple 75 — premium streetwear t-shirts from ৳599. Fast delivery Dhaka, Chittagong, Sylhet & all BD.", path: "/" });
 
   const { data: featuredProducts, isLoading: isLoadingFeatured } = useGetFeaturedProducts();
+  const { data: settings } = useSettings();
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [quickBuyProduct, setQuickBuyProduct] = useState<ProductForModal | null>(null);
+  const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const categoryFilter = activeFilter === "All" ? undefined : activeFilter;
   const { data: filteredProducts, isLoading: isLoadingFiltered } = useListProducts(categoryFilter ? { category: categoryFilter } : undefined);
   const displayProducts = activeFilter === "All" ? featuredProducts : filteredProducts;
   const isLoading = activeFilter === "All" ? isLoadingFeatured : isLoadingFiltered;
   const filters = ["All", "Anime", "Music", "Gaming", "Street"];
+
+  const heroTitleLines = (settings?.storeInfo?.heroTitle || "Wear\nLouder.\nLive\nBolder.").split("\n");
+  const heroSubtitle = settings?.storeInfo?.heroSubtitle || "Premium streetwear that hits different. Anime · Music · Street · Gaming.";
+
+  const toggleWishlist = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    setWishlist(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div style={{ background: "#050508", color: "#f5f6fa" }}>
@@ -50,14 +66,13 @@ export default function Home() {
           </div>
 
           <h1 className="font-black text-7xl md:text-9xl lg:text-[130px] uppercase leading-[0.85] mb-8 tracking-tighter">
-            <span className="block text-white">Wear</span>
-            <span className="block gradient-text">Louder.</span>
-            <span className="block text-white">Live</span>
-            <span className="block text-white">Bolder.</span>
+            {heroTitleLines.map((line, idx) => (
+              <span key={idx} className={`block ${idx === 1 ? "gradient-text" : "text-white"}`}>{line}</span>
+            ))}
           </h1>
 
-          <p className="text-slate-400 text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed">
-            Premium streetwear that hits different. Anime · Music · Street · Gaming.
+          <p className="text-slate-400 text-lg md:text-xl max-w-lg mb-10 font-medium leading-relaxed whitespace-pre-line">
+            {heroSubtitle}
             <span className="font-bold" style={{ color: "#ff4500" }}> Only ৳599.</span>
           </p>
 
@@ -125,7 +140,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {displayProducts?.slice(0, 8).map(product => (
+            {displayProducts?.slice(0, 20).map(product => (
               <div key={product.id} className="group relative product-card-hover">
                 <div className="aspect-[4/5] overflow-hidden mb-4 relative rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.1)" }}>
                   <Link href={`/product/${product.id}`}>
@@ -137,10 +152,13 @@ export default function Home() {
                       <Star className="w-2.5 h-2.5" fill="currentColor" />Hot
                     </div>
                   )}
+                  <button onClick={(e) => toggleWishlist(e, product.id)} className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-black/40 hover:bg-black/70 border border-white/10 group-hover:opacity-100 opacity-0 md:opacity-100">
+                    <Heart className={`w-4 h-4 ${wishlist.has(product.id) ? 'text-rose-500 fill-rose-500' : 'text-white'}`} />
+                  </button>
                   <div className="absolute bottom-0 left-0 right-0 flex translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                    <button onClick={e => { e.preventDefault(); setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes }); }}
+                    <button onClick={e => { e.preventDefault(); setQuickBuyProduct({ id: product.id, name: product.name, price: product.salePrice || product.price, originalPrice: product.salePrice ? product.price : undefined, imageUrl: product.imageUrl, sizes: product.sizes }); }}
                       className="flex-1 btn-ai py-3 flex items-center justify-center gap-1.5 rounded-none rounded-bl-xl text-[11px]">
-                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Zap className="w-3.5 h-3.5" fill="currentColor" />Buy Now</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><ShoppingBag className="w-3.5 h-3.5" />Add to Bag</span>
                     </button>
                     <Link href={`/product/${product.id}`} className="w-14 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-white rounded-none rounded-br-xl" style={{ background: "rgba(0,0,0,0.7)", borderLeft: "1px solid rgba(255,23,68,0.2)" }}>View</Link>
                   </div>
@@ -149,10 +167,16 @@ export default function Home() {
                   <Link href={`/product/${product.id}`}><h3 className="font-bold uppercase tracking-wide truncate text-white hover:text-red-300 transition-colors text-sm">{product.name}</h3></Link>
                   <div className="flex items-center justify-between mt-1">
                     <div className="flex items-baseline gap-1.5">
-                      <p className="font-black text-base gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
-                      <p className="text-slate-600 font-bold text-xs line-through">৳999</p>
+                      {product.salePrice ? (
+                        <>
+                          <p className="font-black text-base gradient-text-red-orange">৳{product.salePrice.toFixed(0)}</p>
+                          <p className="text-slate-600 font-bold text-xs line-through">৳{product.price.toFixed(0)}</p>
+                        </>
+                      ) : (
+                        <p className="font-black text-base gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
+                      )}
                     </div>
-                    <button onClick={() => setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes })} className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
+                    <button onClick={() => setQuickBuyProduct({ id: product.id, name: product.name, price: product.salePrice || product.price, originalPrice: product.salePrice ? product.price : undefined, imageUrl: product.imageUrl, sizes: product.sizes })} className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
                       <Zap className="w-3 h-3" />Buy
                     </button>
                   </div>
@@ -194,8 +218,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── APP DOWNLOAD ─────────────────────────────────────── */}
+      <section className="py-24" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.01) 0%, transparent 100%)" }}>
+        <div className="container px-4 md:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12 p-8 md:p-12 rounded-3xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.15)", boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}>
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white" style={{ background: "rgba(255,255,255,0.1)" }}>
+                <Smartphone className="w-3.5 h-3.5" /> Be Simple 75 App
+              </div>
+              <h2 className="font-black text-4xl md:text-5xl uppercase tracking-tighter mb-4 text-white">Take the Studio <br/><span className="gradient-text">Anywhere</span></h2>
+              <p className="text-slate-400 text-base leading-relaxed mb-8">Scan the QR code to install our Progressive Web App (PWA) directly to your home screen. Experience faster loading, seamless ordering, and instant access to our latest drops.</p>
+              <div className="flex gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><Zap className="w-4 h-4 text-rose-500" /></div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-300">Fast</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><Star className="w-4 h-4 text-rose-500" /></div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-300">Native Feel</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative p-6 rounded-2xl bg-white flex-shrink-0 group">
+              <div className="absolute inset-0 rounded-2xl opacity-50 blur-xl group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", zIndex: -1 }} />
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(typeof window !== "undefined" ? window.location.origin : "https://besimple75.com")}`} alt="Download App" className="w-[160px] h-[160px] object-contain rounded-lg" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-lg p-1 shadow-xl">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" style={{ filter: "invert(1)" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="relative py-24 overflow-hidden">
+      <section className="relative py-24 overflow-hidden border-t border-white/5">
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, rgba(255,23,68,0.1) 0%, transparent 70%)" }} />
         <div className="container px-4 md:px-8 relative z-10 text-center">
           <p className="text-[11px] font-black uppercase tracking-widest mb-4" style={{ color: "#ff1744" }}>Custom Design Studio</p>

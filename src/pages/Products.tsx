@@ -67,7 +67,7 @@ export default function Products() {
                     </div>
                   )}
                   <div className="absolute bottom-0 left-0 right-0 flex translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                    <button onClick={e => { e.preventDefault(); setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes }); }}
+                    <button onClick={e => { e.preventDefault(); setQuickBuyProduct({ id: product.id, name: product.name, price: product.salePrice || product.price, originalPrice: product.salePrice ? product.price : undefined, imageUrl: product.imageUrl, sizes: product.sizes }); }}
                       className="flex-1 btn-ai py-3 flex items-center justify-center gap-1.5 rounded-none rounded-bl-xl text-[11px]">
                       <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Zap className="w-3.5 h-3.5" fill="currentColor" />Buy Now</span>
                     </button>
@@ -78,10 +78,16 @@ export default function Products() {
                   <Link href={`/product/${product.id}`}><h3 className="font-bold uppercase tracking-wide truncate text-white hover:text-red-300 transition-colors text-sm">{product.name}</h3></Link>
                   <div className="flex items-center justify-between mt-1">
                     <div className="flex items-baseline gap-1.5">
-                      <p className="font-black text-base gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
-                      <p className="text-slate-600 font-bold text-xs line-through">৳999</p>
+                      {product.salePrice ? (
+                        <>
+                          <p className="font-black text-base gradient-text-red-orange">৳{product.salePrice.toFixed(0)}</p>
+                          <p className="text-slate-600 font-bold text-xs line-through">৳{product.price.toFixed(0)}</p>
+                        </>
+                      ) : (
+                        <p className="font-black text-base gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
+                      )}
                     </div>
-                    <button onClick={() => setQuickBuyProduct({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, sizes: product.sizes })} className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
+                    <button onClick={() => setQuickBuyProduct({ id: product.id, name: product.name, price: product.salePrice || product.price, originalPrice: product.salePrice ? product.price : undefined, imageUrl: product.imageUrl, sizes: product.sizes })} className="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
                       <Zap className="w-3 h-3" />Buy
                     </button>
                   </div>

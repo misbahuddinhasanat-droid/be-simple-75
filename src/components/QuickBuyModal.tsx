@@ -5,7 +5,7 @@ import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-interface QuickBuyProduct { id: number; name: string; price: number; imageUrl: string; sizes: string[]; }
+interface QuickBuyProduct { id: number; name: string; price: number; originalPrice?: number; imageUrl: string; sizes: string[]; }
 interface QuickBuyModalProps { product: QuickBuyProduct | null; onClose: () => void; }
 
 export function QuickBuyModal({ product, onClose }: QuickBuyModalProps) {
@@ -51,9 +51,17 @@ export function QuickBuyModal({ product, onClose }: QuickBuyModalProps) {
           <div className="flex-1 min-w-0 pt-1">
             <p className="font-black uppercase tracking-wide text-white text-sm leading-tight line-clamp-2">{product.name}</p>
             <div className="flex items-baseline gap-2 mt-1.5">
-              <p className="font-black text-xl gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
-              <p className="text-slate-600 font-bold text-sm line-through">৳999</p>
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest text-white" style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)" }}>40% OFF</span>
+              {product.originalPrice ? (
+                <>
+                  <p className="font-black text-xl gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
+                  <p className="text-slate-600 font-bold text-sm line-through">৳{product.originalPrice.toFixed(0)}</p>
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest text-white" style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)" }}>
+                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                  </span>
+                </>
+              ) : (
+                <p className="font-black text-xl gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
+              )}
             </div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mt-0.5">Free Shipping · 300gsm Cotton</p>
           </div>

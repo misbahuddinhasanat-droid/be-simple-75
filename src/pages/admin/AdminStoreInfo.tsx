@@ -11,9 +11,10 @@ interface StoreInfo {
   siInstagramUrl: string;
   siFacebookUrl: string;
   siEmail: string;
-  siPolicyReturn: string;
   siPolicyDelivery: string;
   siPolicyPayment: string;
+  siHeroTitle: string;
+  siHeroSubtitle: string;
 }
 
 const EMPTY: StoreInfo = {
@@ -26,6 +27,8 @@ const EMPTY: StoreInfo = {
   siPolicyReturn: "",
   siPolicyDelivery: "",
   siPolicyPayment: "",
+  siHeroTitle: "",
+  siHeroSubtitle: "",
 };
 
 const AI_INPUT = "w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-transparent outline-none transition-all";
@@ -155,6 +158,26 @@ export default function AdminStoreInfo() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Homepage Message */}
+          <div className="md:col-span-2">
+            <SectionCard id="homepage" title="Homepage Message" color="#a855f7" icon={<FileText className="w-4 h-4" style={{ color: "#a855f7" }} />}
+              onSave={() => save("homepage", ["siHeroTitle", "siHeroSubtitle"])}
+              saving={savingId === "homepage"} saved={savedId === "homepage"}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Hero Title (Use \n for new lines)</label>
+                  <textarea rows={4} value={info.siHeroTitle} onChange={e => set("siHeroTitle")(e.target.value)} placeholder="Wear\nLouder.\nLive\nBolder."
+                    className={`${AI_INPUT} resize-none`} style={{ background: "rgba(255,23,68,0.04)", border: "1px solid rgba(255,23,68,0.15)" }} />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Hero Subtitle</label>
+                  <textarea rows={4} value={info.siHeroSubtitle} onChange={e => set("siHeroSubtitle")(e.target.value)} placeholder="Premium streetwear that hits different..."
+                    className={`${AI_INPUT} resize-none`} style={{ background: "rgba(255,23,68,0.04)", border: "1px solid rgba(255,23,68,0.15)" }} />
+                </div>
+              </div>
+            </SectionCard>
+          </div>
+
           {/* WhatsApp */}
           <SectionCard id="whatsapp" title="WhatsApp" color="#25d366" icon={<Phone className="w-4 h-4" style={{ color: "#25d366" }} />}
             onSave={() => save("whatsapp", ["siWhatsappNumber", "siWhatsappUrl"])}

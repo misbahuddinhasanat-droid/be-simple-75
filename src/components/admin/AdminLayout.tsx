@@ -116,12 +116,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </button>
           <div className="flex-1" />
           <div className="flex items-center gap-2.5">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest"
-              style={{ background: "rgba(255,23,68,0.07)", border: "1px solid rgba(255,23,68,0.18)", color: "#ff1744" }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />AI ACTIVE
-            </div>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs text-white"
-              style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)" }}>AD</div>
           </div>
         </header>
 

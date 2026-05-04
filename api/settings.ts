@@ -25,6 +25,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         policyReturn: map["si_policy_return"] ?? "7-day return on unworn items",
         policyDelivery: map["si_policy_delivery"] ?? "Dhaka: 1-2 days · Outside: 3-5 days",
         policyPayment: map["si_policy_payment"] ?? "Cash on Delivery (COD)",
+        heroTitle: map["si_hero_title"] ?? "Wear\nLouder.\nLive\nBolder.",
+        heroSubtitle: map["si_hero_subtitle"] ?? "Premium streetwear that hits different. Anime · Music · Street · Gaming.",
       },
     });
   } catch (err) {

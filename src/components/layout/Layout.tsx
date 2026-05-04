@@ -6,6 +6,8 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+import { WhatsAppFloat } from "../WhatsAppFloat";
+
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -14,6 +16,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <Footer />
+      <WhatsAppFloat />
     </div>
   );
 }

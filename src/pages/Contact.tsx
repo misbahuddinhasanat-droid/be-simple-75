@@ -1,6 +1,9 @@
 import { Link } from "wouter";
+import { useSettings } from "@/hooks/useSettings";
 
 export default function Contact() {
+  const { data: settings } = useSettings();
+  const info = settings?.storeInfo;
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-white pt-32 pb-24">
       <div className="container px-4 max-w-4xl mx-auto">
@@ -17,17 +20,17 @@ export default function Contact() {
             <div className="space-y-8">
               <div>
                 <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Email</h3>
-                <p className="text-xl font-bold">support@besimple75.com</p>
+                <p className="text-xl font-bold">{info?.email || "support@besimple75.com"}</p>
               </div>
               
               <div>
                 <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">WhatsApp</h3>
-                <p className="text-xl font-bold">+880 1XXX XXXXXX</p>
+                <p className="text-xl font-bold">{info?.whatsappNumber || "+880 1XXX XXXXXX"}</p>
               </div>
               
               <div>
                 <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Instagram</h3>
-                <p className="text-xl font-bold">@besimple75bd</p>
+                <p className="text-xl font-bold">{info?.instagramHandle || "@besimple75bd"}</p>
               </div>
             </div>
           </div>

@@ -30,6 +30,20 @@ export default function AdminOrders() {
   const [search, setSearch]       = useState("");
   const [expanded, setExpanded]   = useState<number | null>(null);
   const [updating, setUpdating]   = useState<number | null>(null);
+  const [fraudData, setFraudData] = useState<Record<number, any>>({});
+  const [checkingFraud, setCheckingFraud] = useState<number | null>(null);
+
+  const checkFraud = async (orderId: number, phone: string) => {
+    setCheckingFraud(orderId);
+    try {
+      const res = await fetch(`/api/admin/fraud-check?phone=${phone}`, { headers: { "X-Admin-Key": ADMIN_KEY } });
+      const data = await res.json();
+      setFraudData(prev => ({ ...prev, [orderId]: data }));
+    } catch {
+      setFraudData(prev => ({ ...prev, [orderId]: { error: "Failed to check" } }));
+    }
+    setCheckingFraud(null);
+  };
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -161,7 +175,25 @@ export default function AdminOrders() {
                             <div>
                               <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-1">Contact</p>
                               <p className="font-bold text-white">{order.customerName}</p>
-                              <p className="font-bold text-slate-400">{order.customerPhone}</p>
+                              <p className="font-bold text-slate-400 mb-2">{order.customerPhone}</p>
+                              
+                              {!fraudData[order.id] ? (
+                                <button onClick={() => checkFraud(order.id, order.customerPhone)} disabled={checkingFraud === order.id}
+                                  className="px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+                                  style={{ background: "rgba(244,63,94,0.1)", color: "#f43f5e", border: "1px solid rgba(244,63,94,0.2)" }}>
+                                  {checkingFraud === order.id ? "Checking..." : "Check Fraud BD"}
+                                </button>
+                              ) : fraudData[order.id].error ? (
+                                <p className="text-[10px] text-rose-400 font-bold">{fraudData[order.id].error}</p>
+                              ) : (
+                                <div className="p-2 rounded mt-1" style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="text-[9px] font-bold text-slate-400">Grade:</span>
+                                    <span className={`text-[11px] font-black ${['A+', 'A', 'B'].includes(fraudData[order.id].grade) ? 'text-emerald-400' : 'text-rose-400'}`}>{fraudData[order.id].grade}</span>
+                                  </div>
+                                  <p className="text-[9px] text-slate-500 font-medium">Orders: {fraudData[order.id].totalOrder} | Cancelled: {fraudData[order.id].cancelOrder} ({fraudData[order.id].cancelRate}%)</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-start gap-2.5 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,23,68,0.08)" }}>

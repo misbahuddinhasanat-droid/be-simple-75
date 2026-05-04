@@ -1,7 +1,7 @@
 import { useGetProduct } from "@/lib/api";
 import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useParams, Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Paintbrush, Minus, Plus, Zap, ShoppingBag, ArrowLeft, Flame } from "lucide-react";
@@ -18,6 +18,20 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
+  const [showSticky, setShowSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky button after scrolling down a bit
+      if (window.scrollY > 400) {
+        setShowSticky(true);
+      } else {
+        setShowSticky(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useSEO(product ? {
     title: `${product.name} — ৳${product.price.toFixed(0)} Streetwear Tee`,
@@ -83,9 +97,17 @@ export default function ProductDetail() {
             <h1 className="font-black text-5xl md:text-6xl uppercase tracking-tighter mb-5 text-white leading-[0.9]">{product.name}</h1>
 
             <div className="flex items-baseline gap-3 mb-3">
-              <p className="text-4xl font-black gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
-              <p className="text-xl font-black text-slate-600 line-through">৳999</p>
-              <span className="text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-widest" style={{ background: "rgba(255,23,68,0.15)", border: "1px solid rgba(255,23,68,0.3)", color: "#ff4500" }}>40% OFF</span>
+              {product.salePrice ? (
+                <>
+                  <p className="text-4xl font-black gradient-text-red-orange">৳{product.salePrice.toFixed(0)}</p>
+                  <p className="text-xl font-black text-slate-600 line-through">৳{product.price.toFixed(0)}</p>
+                  <span className="text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-widest" style={{ background: "rgba(255,23,68,0.15)", border: "1px solid rgba(255,23,68,0.3)", color: "#ff4500" }}>
+                    {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                  </span>
+                </>
+              ) : (
+                <p className="text-4xl font-black gradient-text-red-orange">৳{product.price.toFixed(0)}</p>
+              )}
             </div>
 
             <div className="flex items-center gap-2 mb-8">
@@ -131,7 +153,7 @@ export default function ProductDetail() {
             <div className="flex flex-col gap-3">
               <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai w-full h-14 rounded-xl text-sm flex items-center justify-center gap-3 disabled:opacity-60">
                 <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  {isBuyingNow ? "Processing..." : <><Zap className="w-5 h-5" fill="currentColor" />Buy Now — ৳{(product.price * quantity).toFixed(0)}</>}
+                  {isBuyingNow ? "Processing..." : <><Zap className="w-5 h-5" fill="currentColor" />Buy Now — ৳{((product.salePrice || product.price) * quantity).toFixed(0)}</>}
                 </span>
               </button>
               <button onClick={handleAddToCart} disabled={addCartItem.isPending} className="btn-ai-outline w-full h-12 rounded-xl text-xs flex items-center justify-center gap-2.5 disabled:opacity-60">
@@ -153,6 +175,21 @@ export default function ProductDetail() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sticky Mobile Buy Now Bar */}
+      <div className={`fixed bottom-0 left-0 right-0 p-4 bg-[#050508]/95 backdrop-blur-md border-t border-white/10 z-40 md:hidden transition-transform duration-300 ${showSticky ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total</span>
+            <span className="text-lg font-black gradient-text-red-orange">৳{((product.salePrice || product.price) * quantity).toFixed(0)}</span>
+          </div>
+          <button onClick={handleBuyNow} disabled={isBuyingNow} className="btn-ai h-12 flex-1 rounded-xl text-xs flex items-center justify-center gap-2 disabled:opacity-60">
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              {isBuyingNow ? "Processing..." : <><Zap className="w-4 h-4" fill="currentColor" />Buy Now</>}
+            </span>
+          </button>
         </div>
       </div>
     </div>

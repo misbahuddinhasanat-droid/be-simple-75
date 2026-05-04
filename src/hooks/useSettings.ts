@@ -13,6 +13,8 @@ export interface StoreSettings {
     policyReturn: string;
     policyDelivery: string;
     policyPayment: string;
+    heroTitle: string;
+    heroSubtitle: string;
   };
 }
 
