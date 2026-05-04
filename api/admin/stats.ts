@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, ordersTable, productsTable, leadsTable } from "../../_lib/db";
+import { getDb, ordersTable, productsTable, leadsTable } from "../_lib/db";
 import { eq, desc, count, sum, sql } from "drizzle-orm";
-import { requireAdmin, cors } from "../../_lib/admin-auth";
+import { requireAdmin, cors } from "../_lib/admin-auth";
 
 function formatOrder(o: typeof ordersTable.$inferSelect) {
   return {
