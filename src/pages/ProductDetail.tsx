@@ -85,7 +85,7 @@ export default function ProductDetail() {
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-          <div className="aspect-[4/5] overflow-hidden sticky top-24 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.12)" }}>
+          <div className="aspect-[4/5] overflow-hidden md:sticky md:top-24 rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.12)" }}>
             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover object-top" />
           </div>
 

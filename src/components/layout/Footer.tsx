@@ -23,7 +23,7 @@ export function Footer() {
             <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs">
               Where self-expression meets the streets. Premium streetwear built for those who refuse to blend in.
             </p>
-            <div className="flex gap-4 mt-8">
+            <div className="flex flex-wrap gap-4 mt-8">
               {[
                 { icon: Instagram, color: "#ff1744", label: "Instagram", href: storeInfo?.instagramUrl },
                 { icon: Facebook, color: "#1877F2", label: "Facebook", href: storeInfo?.facebookUrl },
