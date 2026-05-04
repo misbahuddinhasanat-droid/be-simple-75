@@ -29,18 +29,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  // POST /api/admin/products
+  if (req.method === "POST") {
+    try {
+      const { name, description, price, imageUrl, category, sizes, colors, featured, stock } = req.body;
+      if (!name || !description || price === undefined || !imageUrl) {
+        return res.status(400).json({ error: "Missing required fields: name, description, price, imageUrl" });
+      }
+
+      const [product] = await db.insert(productsTable).values({
+        name,
+        description,
+        price: String(price),
+        imageUrl,
+        category: category || "tshirt",
+        sizes: sizes || ["S", "M", "L", "XL", "XXL"],
+        colors: colors || ["White", "Black"],
+        featured: !!featured,
+        stock: stock !== undefined ? Number(stock) : 100,
+      }).returning();
+
+      return res.status(201).json(formatProduct(product));
+    } catch (err) {
+      console.error("Failed to create product", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
   // PATCH /api/admin/products?id=X
   if (req.method === "PATCH") {
     try {
       const id = parseInt(req.query.id as string);
       if (isNaN(id)) return res.status(400).json({ error: "Invalid product ID" });
-      const { price, featured, stock, name, description } = req.body;
+      const { name, description, price, imageUrl, category, sizes, colors, featured, stock } = req.body;
+      
       const updateData: Record<string, unknown> = {};
-      if (price !== undefined) updateData.price = String(price);
-      if (featured !== undefined) updateData.featured = featured;
-      if (stock !== undefined) updateData.stock = stock;
       if (name !== undefined) updateData.name = name;
       if (description !== undefined) updateData.description = description;
+      if (price !== undefined) updateData.price = String(price);
+      if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+      if (category !== undefined) updateData.category = category;
+      if (sizes !== undefined) updateData.sizes = sizes;
+      if (colors !== undefined) updateData.colors = colors;
+      if (featured !== undefined) updateData.featured = !!featured;
+      if (stock !== undefined) updateData.stock = Number(stock);
+
       if (Object.keys(updateData).length === 0) return res.status(400).json({ error: "No fields to update" });
 
       const [updated] = await db.update(productsTable).set(updateData).where(eq(productsTable.id, id)).returning();
@@ -48,6 +81,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(formatProduct(updated));
     } catch (err) {
       console.error("Failed to update product", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  // DELETE /api/admin/products?id=X
+  if (req.method === "DELETE") {
+    try {
+      const id = parseInt(req.query.id as string);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid product ID" });
+      
+      const [deleted] = await db.delete(productsTable).where(eq(productsTable.id, id)).returning();
+      if (!deleted) return res.status(404).json({ error: "Product not found" });
+      return res.status(200).json({ success: true });
+    } catch (err) {
+      console.error("Failed to delete product", err);
       return res.status(500).json({ error: "Internal server error" });
     }
   }
