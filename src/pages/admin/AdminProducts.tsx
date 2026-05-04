@@ -1,14 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Package, Star, Check, X, Pencil, RefreshCw, Zap, Search, Plus, Image as ImageIcon, Trash2 } from "lucide-react";
+import { Package, Star, Check, X, Pencil, RefreshCw, Zap, Search, Plus, Image as ImageIcon, Trash2, UploadCloud } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { applyFilters } from "@/lib/plugin-system";
 
 const ADMIN_KEY = "besimple2024";
 
 interface Product {
-  id: number; name: string; description: string; price: number;
+  id: number; name: string; description: string; shortDescription?: string | null; 
+  price: number; salePrice?: number | null;
   imageUrl: string; category: string; sizes: string[]; colors: string[];
   featured: boolean; stock: number;
+  customAttributes?: Record<string, any>;
 }
 
 const AI_INPUT_STYLE = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0" };
@@ -25,15 +28,31 @@ function ProductEditor({
   saving: boolean 
 }) {
   const [formData, setFormData] = useState<Partial<Product>>(product || {
-    name: "", description: "", price: 0, imageUrl: "", category: "T-Shirt",
+    name: "", description: "", shortDescription: "", price: 0, salePrice: null,
+    imageUrl: "", category: "T-Shirt",
     sizes: ["S", "M", "L", "XL", "XXL"], colors: ["White", "Black"],
-    featured: false, stock: 100
+    featured: false, stock: 100, customAttributes: {}
   });
 
   const [sizeInput, setSizeInput] = useState("");
   const [colorInput, setColorInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!product) return null;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Get extra fields from plugins!
+  const pluginFields = applyFilters('product_editor_custom_fields', [], { formData, setFormData });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -41,10 +60,10 @@ function ProductEditor({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl"
+        className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl"
         style={{ background: "#0f172a", border: "1px solid rgba(255,23,68,0.2)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#0f172a]/90 backdrop-blur">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#0f172a]/90 backdrop-blur">
           <h2 className="text-xl font-black uppercase tracking-widest text-white">
             {product.id ? "Edit Product" : "New Drop"}
           </h2>
@@ -53,39 +72,41 @@ function ProductEditor({
           </button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Media & Basic Info */}
-          <div className="space-y-6">
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Media & Price */}
+          <div className="space-y-6 lg:col-span-1">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Product Image URL</label>
-              <div className="flex gap-2">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Product Image</label>
+              
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer group relative aspect-[4/5] rounded-2xl overflow-hidden bg-white/5 border-2 border-dashed border-white/20 hover:border-rose-500/50 transition-colors flex flex-col items-center justify-center text-slate-500"
+              >
+                {formData.imageUrl ? (
+                  <>
+                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover object-top" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white text-xs font-bold uppercase tracking-widest flex items-center gap-2"><UploadCloud className="w-4 h-4" /> Change Image</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="w-10 h-10 mb-2 opacity-50 group-hover:text-rose-500 transition-colors" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-center px-4">Click to Upload Image<br/><span className="text-[8px] opacity-50">(Auto Base64)</span></p>
+                  </>
+                )}
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+              </div>
+
+              <div className="mt-3 flex gap-2 items-center">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">OR URL:</span>
                 <input value={formData.imageUrl || ""} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://..." className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium outline-none transition-all focus:border-rose-500/50"
+                  placeholder="https://..." className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium outline-none transition-all focus:border-rose-500/50"
                   style={AI_INPUT_STYLE} />
               </div>
-              {formData.imageUrl ? (
-                <div className="mt-4 aspect-[4/5] rounded-2xl overflow-hidden bg-white/5 border border-white/10 relative group">
-                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover object-top" />
-                </div>
-              ) : (
-                <div className="mt-4 aspect-[4/5] rounded-2xl bg-white/5 border border-dashed border-white/20 flex flex-col items-center justify-center text-slate-500">
-                  <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
-                  <p className="text-[10px] font-bold uppercase tracking-widest">No Image</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Details */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Product Name</label>
-              <input value={formData.name || ""} onChange={e => setFormData({ ...formData, name: e.target.value })}
-                placeholder="E.g. BERSERK OVERSIZED TEE" className="w-full px-3 py-2.5 rounded-xl text-lg font-black uppercase tracking-wide outline-none focus:border-rose-500/50"
-                style={AI_INPUT_STYLE} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Price (৳)</label>
                 <input type="number" value={formData.price || ""} onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
@@ -93,22 +114,40 @@ function ProductEditor({
                   style={AI_INPUT_STYLE} />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Stock</label>
-                <input type="number" value={formData.stock ?? 100} onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                  className="w-full px-3 py-2.5 rounded-xl text-lg font-black outline-none focus:border-rose-500/50"
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Sale Price (৳)</label>
+                <input type="number" value={formData.salePrice || ""} onChange={e => setFormData({ ...formData, salePrice: e.target.value ? Number(e.target.value) : null })}
+                  className="w-full px-3 py-2.5 rounded-xl text-lg font-black text-amber-500 outline-none focus:border-amber-500/50 placeholder:text-slate-600"
+                  placeholder="Optional"
                   style={AI_INPUT_STYLE} />
               </div>
             </div>
-
+            
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Category</label>
-              <input value={formData.category || ""} onChange={e => setFormData({ ...formData, category: e.target.value })}
-                placeholder="E.g. Anime, Street" className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Stock Inventory</label>
+              <input type="number" value={formData.stock ?? 100} onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                className="w-full px-3 py-2.5 rounded-xl text-lg font-black outline-none focus:border-rose-500/50"
+                style={AI_INPUT_STYLE} />
+            </div>
+          </div>
+
+          {/* Right Column: Details & Plugins */}
+          <div className="space-y-6 lg:col-span-2">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Product Name</label>
+              <input value={formData.name || ""} onChange={e => setFormData({ ...formData, name: e.target.value })}
+                placeholder="E.g. BERSERK OVERSIZED TEE" className="w-full px-3 py-2.5 rounded-xl text-lg font-black uppercase tracking-wide outline-none focus:border-rose-500/50"
                 style={AI_INPUT_STYLE} />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Description</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Short Description</label>
+              <input value={formData.shortDescription || ""} onChange={e => setFormData({ ...formData, shortDescription: e.target.value })}
+                placeholder="Catchy tagline..." className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
+                style={AI_INPUT_STYLE} />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Full Description</label>
               <textarea value={formData.description || ""} onChange={e => setFormData({ ...formData, description: e.target.value })}
                 rows={4} placeholder="Premium oversized fit..." className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50 resize-none"
                 style={AI_INPUT_STYLE} />
@@ -152,18 +191,33 @@ function ProductEditor({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
-              <button type="button" onClick={() => setFormData({ ...formData, featured: !formData.featured })}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${formData.featured ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'}`}>
-                <Star className="w-4 h-4" fill={formData.featured ? "currentColor" : "none"} />
-                {formData.featured ? "Featured Product" : "Not Featured"}
-              </button>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Category</label>
+                <input value={formData.category || ""} onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="E.g. Anime, Street" className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none focus:border-rose-500/50"
+                  style={AI_INPUT_STYLE} />
+              </div>
+              <div className="flex items-end">
+                <button type="button" onClick={() => setFormData({ ...formData, featured: !formData.featured })}
+                  className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${formData.featured ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10'}`}>
+                  <Star className="w-4 h-4" fill={formData.featured ? "currentColor" : "none"} />
+                  {formData.featured ? "Featured Product" : "Not Featured"}
+                </button>
+              </div>
             </div>
+
+            {/* Plugin Injected Fields */}
+            {pluginFields.length > 0 && (
+              <div className="pt-4 border-t border-white/10">
+                {pluginFields.map((field: any, i: number) => <div key={i}>{field}</div>)}
+              </div>
+            )}
 
           </div>
         </div>
 
-        <div className="sticky bottom-0 p-6 border-t border-white/5 bg-[#0f172a]/90 backdrop-blur flex gap-4 justify-end">
+        <div className="sticky bottom-0 p-6 border-t border-white/5 bg-[#0f172a]/90 backdrop-blur flex gap-4 justify-end z-20">
           <button onClick={onCancel} className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 transition-all">
             Cancel
           </button>
@@ -333,6 +387,11 @@ export default function AdminProducts() {
                         <Star className="w-2.5 h-2.5" fill="currentColor" /> Featured
                       </span>
                     )}
+                    {product.salePrice && (
+                      <span className="backdrop-blur-md flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border" style={{ background: "rgba(255,23,68,0.2)", borderColor: "rgba(255,23,68,0.3)", color: "#ff1744" }}>
+                        SALE
+                      </span>
+                    )}
                   </div>
 
                   {/* Quick Actions (Hover) */}
@@ -350,11 +409,20 @@ export default function AdminProducts() {
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex justify-between items-start gap-4 mb-2">
                     <h3 className="text-sm font-black uppercase tracking-wide text-white leading-tight">{product.name}</h3>
-                    <p className="font-black text-sm text-rose-500">৳{product.price}</p>
+                    <div className="text-right">
+                      {product.salePrice ? (
+                        <>
+                          <p className="font-black text-sm text-rose-500">৳{product.salePrice}</p>
+                          <p className="text-[10px] text-slate-500 line-through">৳{product.price}</p>
+                        </>
+                      ) : (
+                        <p className="font-black text-sm text-rose-500">৳{product.price}</p>
+                      )}
+                    </div>
                   </div>
                   
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4 flex-1 leading-relaxed">
-                    {product.description}
+                  <p className="text-[10px] text-slate-400 mb-4 flex-1">
+                    {product.shortDescription || "No short description"}
                   </p>
 
                   <div className="flex items-center justify-between pt-4 mt-auto border-t border-white/5">

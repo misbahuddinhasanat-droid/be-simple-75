@@ -5,9 +5,11 @@ import { cors } from "./_lib/admin-auth";
 
 function formatProduct(p: typeof productsTable.$inferSelect) {
   return {
-    id: p.id, name: p.name, description: p.description, price: parseFloat(p.price),
+    id: p.id, name: p.name, description: p.description, shortDescription: p.shortDescription,
+    price: parseFloat(p.price), salePrice: p.salePrice ? parseFloat(p.salePrice) : null,
     imageUrl: p.imageUrl, category: p.category, sizes: p.sizes as string[],
     colors: p.colors as string[], featured: p.featured, stock: p.stock,
+    customAttributes: p.customAttributes || {},
   };
 }
 
