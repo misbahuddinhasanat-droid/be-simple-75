@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, leadsTable } from "./_lib/db";
+import { getDb, leadsTable } from "./_lib/db.js";
 import { eq } from "drizzle-orm";
-import { cors } from "./_lib/admin-auth";
+import { cors } from "./_lib/admin-auth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   cors(res);

@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, leadsTable } from "../_lib/db";
+import { getDb, leadsTable } from "../_lib/db.js";
 import { eq, desc } from "drizzle-orm";
-import { requireAdmin, cors } from "../_lib/admin-auth";
+import { requireAdmin, cors } from "../_lib/admin-auth.js";
 
 function formatLead(l: typeof leadsTable.$inferSelect) {
   return {

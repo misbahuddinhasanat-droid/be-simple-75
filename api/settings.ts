@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, settingsTable } from "./_lib/db";
-import { cors } from "./_lib/admin-auth";
+import { getDb, settingsTable } from "./_lib/db.js";
+import { cors } from "./_lib/admin-auth.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   cors(res);
