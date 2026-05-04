@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ShoppingBag, Menu, X, Flame } from "lucide-react";
-import { useGetCart } from "@/lib/api";
+import { useGetCart } from "@/lib/cart-store";
 import { useState } from "react";
 
 export function Navbar() {

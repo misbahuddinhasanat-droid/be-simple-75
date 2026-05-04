@@ -3,9 +3,8 @@ import { Link, useLocation } from "wouter";
 import {
   useListProducts,
   useUploadDesign,
-  useAddCartItem,
-  getGetCartQueryKey,
 } from "@/lib/api";
+import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, X, Loader2, Plus, Minus, Zap, ShoppingBag, ChevronRight } from "lucide-react";

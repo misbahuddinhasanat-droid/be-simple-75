@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useGetCart, useCreateOrder, useClearCart, getGetCartQueryKey } from "@/lib/api";
+import { useCreateOrder } from "@/lib/api";
+import { useGetCart, getGetCartQueryKey, CART_KEY } from "@/lib/cart-store";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,6 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { data: cart, isLoading: isCartLoading } = useGetCart();
   const createOrder = useCreateOrder();
-  const clearCart = useClearCart();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const leadSavedRef = useRef(false);
@@ -122,7 +122,8 @@ export default function Checkout() {
         },
       });
 
-      await clearCart.mutateAsync();
+      // Clear cart from localStorage
+      localStorage.removeItem(CART_KEY);
       queryClient.invalidateQueries({ queryKey: getGetCartQueryKey() });
       setLocation(`/order-confirmation/${order.id}`);
     } catch {

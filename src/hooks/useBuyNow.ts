@@ -1,4 +1,4 @@
-import { useAddCartItem, getGetCartQueryKey } from "@/lib/api";
+import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";

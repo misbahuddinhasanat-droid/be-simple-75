@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Zap, ShoppingBag } from "lucide-react";
 import { useBuyNow } from "@/hooks/useBuyNow";
-import { useAddCartItem, getGetCartQueryKey } from "@/lib/api";
+import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
