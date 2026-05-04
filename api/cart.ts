@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     try {
       // Clear cart (originally POST /api/cart/clear)
-      if (req.url?.endsWith("/clear")) {
+      if (req.query.action === "clear") {
         return res.status(200).json({ items: [], total: 0, itemCount: 0 });
       }
 

@@ -3,8 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/products/featured", "destination": "/api/products?featured=true" },
     { "source": "/api/products/:id", "destination": "/api/products?id=:id" },
     { "source": "/api/orders/:id", "destination": "/api/orders?id=:id" },
+    { "source": "/api/cart/clear", "destination": "/api/cart?action=clear" },
+    { "source": "/api/cart/items", "destination": "/api/cart" },
     { "source": "/api/cart/items/:itemId", "destination": "/api/cart?itemId=:itemId" },
     { "source": "/api/admin/leads/:id", "destination": "/api/admin/leads?id=:id" },
     { "source": "/api/admin/orders/:id", "destination": "/api/admin/orders?id=:id" },
