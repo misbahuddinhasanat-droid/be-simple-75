@@ -7,7 +7,8 @@ function formatProduct(p: typeof productsTable.$inferSelect) {
   return {
     id: p.id, name: p.name, description: p.description, shortDescription: p.shortDescription,
     price: parseFloat(p.price), salePrice: p.salePrice ? parseFloat(p.salePrice) : null,
-    imageUrl: p.imageUrl, category: p.category, sizes: p.sizes as string[],
+    imageUrl: p.imageUrl, gallery: (p.gallery as string[]) || [],
+    category: p.category, sizes: p.sizes as string[],
     colors: p.colors as string[], featured: p.featured, stock: p.stock,
     customAttributes: p.customAttributes || {},
   };
@@ -34,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // POST /api/admin/products
   if (req.method === "POST") {
     try {
-      const { name, description, shortDescription, price, salePrice, imageUrl, category, sizes, colors, featured, stock, customAttributes } = req.body;
+      const { name, description, shortDescription, price, salePrice, imageUrl, gallery, category, sizes, colors, featured, stock, customAttributes } = req.body;
       if (!name || !description || price === undefined || !imageUrl) {
         return res.status(400).json({ error: "Missing required fields: name, description, price, imageUrl" });
       }
@@ -46,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         price: String(price),
         salePrice: salePrice ? String(salePrice) : null,
         imageUrl,
+        gallery: gallery || null,
         category: category || "tshirt",
         sizes: sizes || ["S", "M", "L", "XL", "XXL"],
         colors: colors || ["White", "Black"],
@@ -66,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const id = parseInt(req.query.id as string);
       if (isNaN(id)) return res.status(400).json({ error: "Invalid product ID" });
-      const { name, description, shortDescription, price, salePrice, imageUrl, category, sizes, colors, featured, stock, customAttributes } = req.body;
+      const { name, description, shortDescription, price, salePrice, imageUrl, gallery, category, sizes, colors, featured, stock, customAttributes } = req.body;
       
       const updateData: Record<string, unknown> = {};
       if (name !== undefined) updateData.name = name;
@@ -75,6 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (price !== undefined) updateData.price = String(price);
       if (salePrice !== undefined) updateData.salePrice = salePrice === null ? null : String(salePrice);
       if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+      if (gallery !== undefined) updateData.gallery = gallery;
       if (category !== undefined) updateData.category = category;
       if (sizes !== undefined) updateData.sizes = sizes;
       if (colors !== undefined) updateData.colors = colors;

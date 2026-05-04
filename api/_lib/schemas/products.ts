@@ -8,6 +8,7 @@ export const productsTable = pgTable("products", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
   imageUrl: text("image_url").notNull(),
+  gallery: jsonb("gallery"),
   category: text("category").notNull().default("tshirt"),
   sizes: jsonb("sizes").notNull().default(["S", "M", "L", "XL", "XXL"]),
   colors: jsonb("colors").notNull().default(["White", "Black", "Gray"]),

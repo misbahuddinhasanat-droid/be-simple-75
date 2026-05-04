@@ -9,7 +9,8 @@ const ADMIN_KEY = "besimple2024";
 interface Product {
   id: number; name: string; description: string; shortDescription?: string | null; 
   price: number; salePrice?: number | null;
-  imageUrl: string; category: string; sizes: string[]; colors: string[];
+  imageUrl: string; gallery: string[];
+  category: string; sizes: string[]; colors: string[];
   featured: boolean; stock: number;
   customAttributes?: Record<string, any>;
 }
@@ -29,10 +30,31 @@ function ProductEditor({
 }) {
   const [formData, setFormData] = useState<Partial<Product>>(product || {
     name: "", description: "", shortDescription: "", price: 0, salePrice: null,
-    imageUrl: "", category: "T-Shirt",
+    imageUrl: "", gallery: [], category: "T-Shirt",
     sizes: ["S", "M", "L", "XL", "XXL"], colors: ["White", "Black"],
     featured: false, stock: 100, customAttributes: {}
   });
+  const [galleryUrlInput, setGalleryUrlInput] = useState("");
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, gallery: [...(prev.gallery || []), reader.result as string] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeGalleryImage = (idx: number) => {
+    setFormData(prev => ({ ...prev, gallery: (prev.gallery || []).filter((_, i) => i !== idx) }));
+  };
+
+  const setAsMainImage = (url: string) => {
+    setFormData(prev => ({ ...prev, imageUrl: url }));
+  };
 
   const [sizeInput, setSizeInput] = useState("");
   const [colorInput, setColorInput] = useState("");
@@ -105,6 +127,49 @@ function ProductEditor({
                   style={AI_INPUT_STYLE} />
               </div>
             </div>
+
+            {/* Gallery */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Gallery Images</label>
+                <button type="button" onClick={() => galleryInputRef.current?.click()}
+                  className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+                  <Plus className="w-3 h-3" /> Upload
+                </button>
+                <input type="file" ref={galleryInputRef} className="hidden" accept="image/*" multiple onChange={handleGalleryUpload} />
+              </div>
+              {/* URL add */}
+              <div className="flex gap-2 mb-3">
+                <input value={galleryUrlInput} onChange={e => setGalleryUrlInput(e.target.value)}
+                  placeholder="Paste image URL and press Enter..."
+                  onKeyDown={e => { if (e.key === "Enter" && galleryUrlInput) { e.preventDefault(); setFormData(prev => ({ ...prev, gallery: [...(prev.gallery||[]), galleryUrlInput] })); setGalleryUrlInput(""); } }}
+                  className="flex-1 px-3 py-2 rounded-xl text-xs font-medium outline-none" style={AI_INPUT_STYLE} />
+                <button type="button" onClick={() => { if (galleryUrlInput) { setFormData(prev => ({ ...prev, gallery: [...(prev.gallery||[]), galleryUrlInput] })); setGalleryUrlInput(""); } }}
+                  className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"><Plus className="w-4 h-4" /></button>
+              </div>
+              {/* Gallery grid */}
+              {(formData.gallery || []).length > 0 ? (
+                <div className="grid grid-cols-3 gap-2">
+                  {(formData.gallery || []).map((url, idx) => (
+                    <div key={idx} className="group relative aspect-square rounded-xl overflow-hidden bg-black/40 border border-white/10">
+                      <img src={url} alt="" className="w-full h-full object-cover object-top" />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5">
+                        <button type="button" onClick={() => setAsMainImage(url)}
+                          className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-rose-500/80 text-white">Set Main</button>
+                        <button type="button" onClick={() => removeGalleryImage(idx)}
+                          className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-red-900/60 text-red-300"><Trash2 className="w-3 h-3" /></button>
+                      </div>
+                      {formData.imageUrl === url && (
+                        <span className="absolute top-1 left-1 text-[7px] font-black uppercase px-1.5 py-0.5 rounded bg-rose-500 text-white">Main</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] text-slate-600 text-center py-4 border border-dashed border-white/10 rounded-xl">No gallery images yet. Upload multiple angles.</p>
+              )}
+            </div>
+
 
             <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
               <div>
