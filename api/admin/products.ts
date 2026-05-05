@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb, productsTable } from "../_lib/db.js";
+import { getDb, productsTable, categoriesTable } from "../_lib/db.js";
 import { eq } from "drizzle-orm";
 import { requireAdmin, cors } from "../_lib/admin-auth.js";
 
@@ -21,6 +21,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAdmin(req, res)) return;
 
   const db = getDb();
+  const target = req.query.target;
+
+  // ─── CATEGORY MANAGEMENT ───────────────────────────────────────────────────
+  if (target === "categories") {
+    try {
+      if (req.method === "GET") {
+        const all = await db.select().from(categoriesTable);
+        return res.json(all);
+      }
+      if (req.method === "POST") {
+        const { name, slug } = req.body;
+        const [inserted] = await db.insert(categoriesTable).values({ name, slug }).returning();
+        return res.status(201).json(inserted);
+      }
+      if (req.method === "DELETE") {
+        const id = parseInt(req.query.id as string);
+        await db.delete(categoriesTable).where(eq(categoriesTable.id, id));
+        return res.status(204).end();
+      }
+    } catch (err) {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  // ─── PRODUCT MANAGEMENT ────────────────────────────────────────────────────
 
   // GET /api/admin/products
   if (req.method === "GET") {

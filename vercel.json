@@ -16,7 +16,14 @@
     { "source": "/api/cart/items/:itemId", "destination": "/api/cart?itemId=:itemId" },
     { "source": "/api/admin/leads/:id", "destination": "/api/admin/leads?id=:id" },
     { "source": "/api/admin/orders/:id", "destination": "/api/admin/orders?id=:id" },
+    { "source": "/api/admin/fraud-check", "destination": "/api/admin/leads" },
+    { "source": "/api/admin/categories", "destination": "/api/admin/products?target=categories" },
     { "source": "/api/admin/products/:id", "destination": "/api/admin/products?id=:id" },
+    { "source": "/api/customer/orders", "destination": "/api/customer?action=orders" },
+    { "source": "/api/customer/track", "destination": "/api/customer?action=track" },
+    { "source": "/api/auth/login", "destination": "/api/auth?action=login" },
+    { "source": "/api/auth/register", "destination": "/api/auth?action=register" },
+    { "source": "/api/auth/me", "destination": "/api/auth?action=me" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

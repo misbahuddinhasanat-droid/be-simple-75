@@ -53,5 +53,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  // POST /api/admin/leads (Fraud Check)
+  if (req.method === "POST") {
+    try {
+      const { name, phone, address } = req.body;
+      let score = 85;
+      let reason = "Customer details appear normal. Manual review recommended for first-time buyers.";
+      let grade = "A";
+
+      const badKeywords = ["test", "fake", "demo", "dummy", "adsense", "click"];
+      const lowerAddr = (address || "").toLowerCase();
+      const lowerName = (name || "").toLowerCase();
+      
+      if (badKeywords.some(k => lowerAddr.includes(k) || lowerName.includes(k))) {
+        score = 20; grade = "F"; reason = "Suspicious keywords found in name or address. Possible bot or test lead.";
+      } else if (phone && (phone.length < 11 || phone.startsWith("000"))) {
+        score = 35; grade = "D"; reason = "Invalid or suspicious phone number format.";
+      } else if (phone && (phone.startsWith("017") || phone.startsWith("019") || phone.startsWith("018"))) {
+        score = 95; grade = "A+"; reason = "Verified local carrier prefix. High probability of authentic customer.";
+      }
+
+      return res.json({ grade, score, reason });
+    } catch (err) {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
   return res.status(405).json({ error: "Method not allowed" });
 }
