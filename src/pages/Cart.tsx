@@ -21,7 +21,7 @@ export default function Cart() {
   if (isLoading) {
     return (
       <div className="bg-[#050508] min-h-screen text-[#f0f0f0]">
-        <div className="container px-6 py-20 max-w-4xl mx-auto">
+        <div className="container px-4 md:px-8 py-20 max-w-4xl mx-auto">
           <div className="h-12 w-64 bg-white/5 animate-pulse rounded-lg mb-12"></div>
           <div className="space-y-6">
             {[1, 2].map(i => (
@@ -62,7 +62,7 @@ export default function Cart() {
 
   return (
     <div className="bg-[#050508] min-h-screen text-[#f0f0f0] pb-32">
-      <div className="container px-6 py-20 max-w-7xl mx-auto">
+      <div className="container px-4 md:px-8 py-20 max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-16 border-b border-white/5 pb-10">
            <div>
               <p className="text-rose-500 text-[10px] font-black uppercase tracking-[0.4em] mb-4">Inventory Checkout</p>

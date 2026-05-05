@@ -66,7 +66,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="container relative z-10 px-6 md:px-12">
+        <div className="container relative z-10 px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -125,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* ── PRODUCT FEED ─────────────────────────────────────── */}
-      <section className="container px-6 md:px-12 py-32 relative z-10">
+      <section className="container px-4 md:px-8 py-20 md:py-32 relative z-10">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-16 gap-10">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-widest mb-4">
@@ -221,9 +221,9 @@ export default function Home() {
       </section>
 
       {/* ── TRUST & FEATURES ──────────────────────────────────── */}
-      <section className="py-32 border-y border-white/5 bg-white/2 relative overflow-hidden">
+      <section className="py-20 md:py-32 border-y border-white/5 bg-white/2 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/5 blur-[100px] pointer-events-none" />
-        <div className="container px-6 md:px-12">
+        <div className="container px-4 md:px-8">
            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
               {[
                 { icon: <ShieldCheck className="w-8 h-8 text-rose-500" />, title: "Secure Drop", desc: "Every unit undergoes a 12-point quality manifest before uplinking to your address." },
@@ -241,8 +241,8 @@ export default function Home() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="py-40 relative overflow-hidden">
-        <div className="container px-6 md:px-12 text-center relative z-10">
+      <section className="py-24 md:py-40 relative overflow-hidden">
+        <div className="container px-4 md:px-8 text-center relative z-10">
            <p className="text-rose-500 text-[10px] font-black uppercase tracking-[0.5em] mb-8">Studio Integration</p>
            <h2 className="font-black text-7xl md:text-9xl uppercase tracking-tighter text-white italic leading-[0.8] mb-12">
              Design Your<br />Own Reality.

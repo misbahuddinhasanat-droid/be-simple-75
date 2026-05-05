@@ -180,7 +180,7 @@ export default function Checkout() {
 
   return (
     <div className="bg-[#050508] min-h-screen text-[#f5f6fa] pb-24 selection:bg-rose-500/30">
-      <div className="container px-4 py-12 max-w-6xl mx-auto">
+      <div className="container px-4 md:px-8 py-12 max-w-6xl mx-auto">
         <Link href="/cart" className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-white mb-10 transition-colors group">
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Bag
         </Link>

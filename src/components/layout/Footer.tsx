@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="relative overflow-hidden" style={{ borderTop: "1px solid rgba(255,23,68,0.12)", background: "#030305" }}>
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-48 pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(255,23,68,0.06) 0%, transparent 70%)" }} />
 
-      <div className="container px-4 py-16 md:py-20 lg:px-8 relative z-10">
+      <div className="container px-4 md:px-8 py-16 md:py-20 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">

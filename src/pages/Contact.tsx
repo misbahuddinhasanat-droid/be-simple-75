@@ -39,7 +39,7 @@ export default function Contact() {
 
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-white pt-28 md:pt-32 pb-24 px-4">
-      <div className="container max-w-4xl mx-auto">
+      <div className="container px-4 md:px-8 max-w-4xl mx-auto">
         <p className="text-[11px] font-black uppercase tracking-widest text-rose-500 mb-2">Be Simple 75</p>
         <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6 border-b border-white/10 pb-6">
           Contact Us
