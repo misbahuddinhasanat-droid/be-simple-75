@@ -43,7 +43,7 @@ export default function Home() {
       {/* Promo marquee lives in Layout TopBar — single store-wide source */}
 
       {/* ── HERO (Hulu Style) ─────────────────────────────────── */}
-      <section className="relative h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-[calc(100vh-10rem)] flex items-center overflow-hidden">
         {/* Background Layers */}
         <div className="absolute inset-0 z-0">
           <video
@@ -79,12 +79,12 @@ export default function Home() {
 
             <h1 className="font-black text-7xl md:text-9xl lg:text-[140px] uppercase leading-[0.8] mb-10 tracking-tighter italic text-white drop-shadow-2xl">
               {heroTitleLines.map((line, idx) => (
-                <span key={idx} className="block overflow-hidden h-[1.1em]">
+                <span key={idx} className="block overflow-hidden h-[1.3em]">
                   <motion.span 
                     initial={{ y: "100%" }}
                     animate={{ y: 0 }}
                     transition={{ delay: 0.2 + idx * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className={`block ${idx === 1 ? "text-rose-500" : "text-white"}`}
+                    className={`block leading-none ${idx === 1 ? "text-rose-500" : "text-white"}`}
                   >
                     {line}
                   </motion.span>
