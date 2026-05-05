@@ -15,6 +15,11 @@ export interface StoreSettings {
     policyPayment: string;
     heroTitle: string;
     heroSubtitle: string;
+    siPromoBannerText?: string;
+    siPromoCode?: string;
+    siPromoDiscountPercent?: string;
+    siHeroVideoUrl?: string;
+    siMessengerUrl?: string;
   };
 }
 

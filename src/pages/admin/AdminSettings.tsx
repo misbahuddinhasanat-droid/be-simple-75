@@ -107,7 +107,31 @@ export default function AdminSettings() {
       try {
         const res = await fetch("/api/admin/settings", { headers: { "X-Admin-Key": ADMIN_KEY } });
         const data = await res.json();
-        setSettings(prev => ({ ...prev, ...data }));
+        // Map all keys correctly
+        const mapped: Partial<Settings> = {
+          gtmId: data.gtmId,
+          pixelId: data.pixelId,
+          tiktokPixelId: data.tiktokPixelId,
+          ga4MeasurementId: data.ga4MeasurementId,
+          bdcourierApiKey: data.bdcourierApiKey,
+          pathaoClientId: data.pathaoClientId,
+          pathaoClientSecret: data.pathaoClientSecret,
+          steadfastApiKey: data.steadfastApiKey,
+          steadfastSecretKey: data.steadfastSecretKey,
+          oneclickApiKey: data.oneclickApiKey,
+          uddoktapayApiKey: data.uddoktapayApiKey,
+          uddoktapayApiSecret: data.uddoktapayApiSecret,
+          sslcommerzStoreId: data.sslcommerzStoreId,
+          sslcommerzPassword: data.sslcommerzPassword,
+          bkashApiKey: data.bkashApiKey,
+          whatsappNumber: data.whatsappNumber || data.siWhatsappNumber,
+          smsApiKey: data.smsApiKey,
+          instagramUrl: data.instagramUrl || data.siInstagramUrl,
+          facebookUrl: data.facebookUrl || data.siFacebookUrl,
+          twitterUrl: data.twitterUrl,
+          tiktokUrl: data.tiktokUrl,
+        };
+        setSettings(prev => ({ ...prev, ...mapped }));
       } catch { /* silent */ }
       setLoading(false);
     };

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 // ─── EDIT THESE CONSTANTS TO MATCH YOUR BRAND ─────────────────────────────
-const BASE_URL = "https://besimple75.com"; // ← change to your live domain
+const BASE_URL = "https://besimple75.vercel.app"; // ← change to your live domain
 const STORE_NAME = "Be Simple 75";
 const BASE_TITLE = "Be Simple 75 — Premium Streetwear Bangladesh | ৳599";
 const BASE_DESC =

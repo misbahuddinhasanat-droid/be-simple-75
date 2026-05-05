@@ -9,7 +9,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { phone, name, email, cartItems, cartTotal } = req.body;
+    const body = req.body as Record<string, unknown>;
+    /** Contact page — no BD phone required; stored in leads for admin inbox. */
+    if (body?.kind === "contact") {
+      const name = String(body.name ?? "").trim().slice(0, 120);
+      const email = String(body.email ?? "").trim();
+      const message = String(body.message ?? "").trim().slice(0, 4000);
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!name.length || !emailOk || !message.length) {
+        return res.status(400).json({ error: "Name, valid email, and message are required" });
+      }
+      const ref = `CX-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+      const db = getDb();
+      await db.insert(leadsTable).values({
+        phone: ref,
+        name,
+        email,
+        cartItems: [] as unknown[],
+        cartTotal: "0",
+        status: "new",
+        notes: `[contact] ${message}`,
+      });
+      return res.json({ ok: true });
+    }
+
+    const { phone, name, email, cartItems, cartTotal } = body as {
+      phone?: string;
+      name?: string;
+      email?: string;
+      cartItems?: unknown[];
+      cartTotal?: unknown;
+    };
     if (!phone || !/^01[3-9]\d{8}$/.test(phone.replace(/\s/g, ""))) {
       return res.status(400).json({ error: "Invalid Bangladesh phone number" });
     }

@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { TopBar } from "./TopBar";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 import { WhatsAppFloat } from "../WhatsAppFloat";
-import { AIChatWidget } from "../AIChatWidget";
 import { MessengerFloat } from "../MessengerFloat";
 
 export function Layout({ children }: LayoutProps) {
@@ -30,6 +30,7 @@ export function Layout({ children }: LayoutProps) {
         className="glow-trail hidden md:block" 
         style={{ transform: `translate(${mousePos.x - 150}px, ${mousePos.y - 150}px)` }} 
       />
+      <TopBar />
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.main
@@ -45,7 +46,6 @@ export function Layout({ children }: LayoutProps) {
       </AnimatePresence>
       <Footer />
       <WhatsAppFloat />
-      <AIChatWidget />
       <MessengerFloat />
     </div>
   );

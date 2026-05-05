@@ -27,6 +27,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         policyPayment: map["si_policy_payment"] ?? "Cash on Delivery (COD)",
         heroTitle: map["si_hero_title"] ?? "Wear\nLouder.\nLive\nBolder.",
         heroSubtitle: map["si_hero_subtitle"] ?? "Premium streetwear that hits different. Anime · Music · Street · Gaming.",
+        siPromoBannerText: (map["si_promo_banner_text"] ?? "").trim() ||
+          "10% OFF — use your promo code at checkout · Free shipping vibes · COD all Bangladesh · besimple75",
+        siPromoCode: map["si_promo_code"] ?? "",
+        siPromoDiscountPercent: map["si_promo_discount_percent"] ?? "0",
+        siHeroVideoUrl: map["si_hero_video_url"] ?? "",
+        siAiKnowledgeBase: map["si_ai_knowledge_base"] ?? "",
+        siMessengerUrl: map["si_messenger_url"] ?? "",
       },
     });
   } catch (err) {

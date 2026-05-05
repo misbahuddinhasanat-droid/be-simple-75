@@ -7,10 +7,12 @@ import {
 import { useAddCartItem, getGetCartQueryKey } from "@/lib/cart-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Loader2, Plus, Minus, Zap, ShoppingBag, ChevronRight } from "lucide-react";
+import { Upload, X, Loader2, Plus, Minus, Zap, ShoppingBag, ChevronRight, Layers, Settings2, Eye } from "lucide-react";
 import { useBuyNow } from "@/hooks/useBuyNow";
+import { motion } from "framer-motion";
 
 type View = "front" | "back";
+type Tab = "preview" | "design" | "options";
 
 const SIZES = ["S", "M", "L", "XL", "XXL", "3XL"];
 
@@ -19,7 +21,6 @@ const VIEWS: { id: View; label: string; front: string; back: string }[] = [
   { id: "back",  label: "Back",  front: "/products/angel-back.jpg",   back: "/products/angel-back.jpg" },
 ];
 
-// Print area as % of image dimensions for overlay positioning
 const PRINT_AREA = {
   front: { top: "27%", left: "28%", width: "44%", height: "33%" },
   back:  { top: "22%", left: "25%", width: "50%", height: "42%" },
@@ -41,10 +42,11 @@ export default function Customize() {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("preview");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const customProduct = products?.[0];
-  const price = customProduct?.price ?? 44.99;
+  const price = customProduct?.price ?? 1250;
 
   const processFile = useCallback(
     async (file: File) => {
@@ -61,6 +63,7 @@ export default function Customize() {
         const base64 = ev.target?.result as string;
         setDesignDataUrl(base64);
         setIsUploading(true);
+        setActiveTab("preview"); // Switch to preview to see it
         try {
           const result = await uploadDesign.mutateAsync({ data: { imageData: base64, filename: file.name } });
           setUploadedUrl(result.url);
@@ -109,22 +112,43 @@ export default function Customize() {
 
   return (
     <div
-      className="flex bg-[#0a0a0a] text-white overflow-hidden"
-      style={{ height: "calc(100vh - 64px)" }}
+      className="flex flex-col md:flex-row bg-[#050508] text-white overflow-hidden w-full min-h-0 md:min-h-[calc(100vh-5rem)] min-h-[calc(100dvh-5rem)]"
+      style={{ maxHeight: "none" }}
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false); }}
       onDrop={handleDrop}
     >
-      {/* ── LEFT THUMBNAIL STRIP ── */}
-      <div className="w-[76px] flex-shrink-0 bg-[#080808] border-r border-[#1a1a1a] flex flex-col items-center py-4 gap-3 overflow-y-auto">
+      {/* ── MOBILE TAB NAVIGATION ── */}
+      <div className="flex md:hidden bg-[#0a0a0c] border-b border-white/5 px-2">
+        {(["preview", "design", "options"] as Tab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${
+              activeTab === tab ? "text-rose-500" : "text-slate-500"
+            }`}
+          >
+            <div className="flex flex-col items-center gap-1">
+              {tab === "preview" && <Eye className="w-4 h-4" />}
+              {tab === "design" && <Layers className="w-4 h-4" />}
+              {tab === "options" && <Settings2 className="w-4 h-4" />}
+              {tab}
+            </div>
+            {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500" />}
+          </button>
+        ))}
+      </div>
+
+      {/* ── LEFT THUMBNAIL STRIP (DESKTOP) ── */}
+      <div className="hidden md:flex w-[80px] flex-shrink-0 bg-[#080808] border-r border-white/5 flex-col items-center py-6 gap-4 overflow-y-auto">
         {VIEWS.map((v) => (
           <button
             key={v.id}
             onClick={() => setView(v.id)}
-            className="flex flex-col items-center gap-1.5 group w-full px-2"
+            className="flex flex-col items-center gap-2 group w-full px-3"
           >
-            <div className={`w-full aspect-[3/4] border-2 overflow-hidden transition-all ${
-              view === v.id ? "border-white" : "border-[#2a2a2a] group-hover:border-zinc-500"
+            <div className={`w-full aspect-[3/4] border-2 overflow-hidden transition-all rounded-lg ${
+              view === v.id ? "border-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.3)]" : "border-white/5 group-hover:border-white/20"
             }`}>
               <img
                 src={v.id === "front" ? "/products/blessed-front.jpg" : "/products/angel-back.jpg"}
@@ -132,66 +156,84 @@ export default function Customize() {
                 className="w-full h-full object-cover object-top"
               />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${
-              view === v.id ? "text-white" : "text-zinc-600 group-hover:text-zinc-400"
+            <span className={`text-[8px] font-black uppercase tracking-widest transition-colors ${
+              view === v.id ? "text-rose-500" : "text-slate-600 group-hover:text-slate-400"
             }`}>
               {v.label}
             </span>
           </button>
         ))}
 
-        <div className="mt-auto w-full px-2">
+        <div className="mt-auto w-full px-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full aspect-square border border-[#2a2a2a] hover:border-zinc-500 flex flex-col items-center justify-center gap-1 text-zinc-600 hover:text-white transition-all"
+            className="w-full aspect-square border border-dashed border-white/10 hover:border-rose-500/50 rounded-xl flex flex-col items-center justify-center gap-1.5 text-slate-600 hover:text-rose-500 transition-all bg-white/2"
           >
             <Upload className="w-4 h-4" />
-            <span className="text-[8px] font-black uppercase tracking-widest">Upload</span>
+            <span className="text-[7px] font-black uppercase tracking-widest text-center">Drop<br/>File</span>
           </button>
         </div>
       </div>
 
-      {/* ── CENTER CANVAS ── */}
+      {/* ── CENTER CANVAS (PREVIEW TAB) ── */}
       <div
-        className="flex-1 relative flex flex-col items-center justify-center overflow-hidden"
-        style={{ background: "radial-gradient(ellipse 80% 80% at 50% 40%, #181818 0%, #0a0a0a 100%)" }}
+        className={`flex-1 relative flex flex-col items-center justify-center overflow-hidden transition-opacity duration-300 ${
+          activeTab === "preview" ? "opacity-100" : "hidden md:flex opacity-100"
+        }`}
+        style={{ background: "radial-gradient(circle at 50% 40%, #111115 0%, #050508 100%)" }}
       >
-        {/* View label + status */}
-        <div className="absolute top-5 left-5 flex gap-2 z-10">
-          <span className="bg-black/70 backdrop-blur border border-[#2a2a2a] text-[10px] font-black px-3 py-1.5 uppercase tracking-widest text-zinc-400">
-            {view === "front" ? "Front View" : "Back View"}
+        {/* View Switcher (Mobile) */}
+        <div className="md:hidden absolute top-6 flex gap-2 z-20">
+           {VIEWS.map(v => (
+             <button 
+              key={v.id} 
+              onClick={() => setView(v.id)}
+              className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ${
+                view === v.id ? "bg-rose-600 border-rose-600 text-white shadow-lg" : "bg-white/5 border-white/10 text-slate-500"
+              }`}
+             >
+               {v.label}
+             </button>
+           ))}
+        </div>
+
+        {/* View labels */}
+        <div className="absolute top-5 left-5 hidden md:flex flex-col gap-2 z-10">
+          <span className="bg-black/50 backdrop-blur border border-white/5 text-[9px] font-black px-3 py-1.5 uppercase tracking-widest text-slate-400 rounded-lg">
+            {view === "front" ? "Perspective: Front" : "Perspective: Back"}
           </span>
           {designDataUrl && !isUploading && (
-            <span className="bg-[#e63329] text-white text-[10px] font-black px-3 py-1.5 uppercase tracking-widest">
-              Design Applied
+            <span className="bg-green-500/10 border border-green-500/20 text-green-500 text-[9px] font-black px-3 py-1.5 uppercase tracking-widest rounded-lg flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Asset Applied
             </span>
           )}
           {isUploading && (
-            <span className="bg-black/70 backdrop-blur border border-[#2a2a2a] text-[10px] font-black px-3 py-1.5 uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              Processing...
+            <span className="bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[9px] font-black px-3 py-1.5 uppercase tracking-widest rounded-lg flex items-center gap-2">
+              <Loader2 className="w-3 h-3 animate-spin" /> Uplinking...
             </span>
           )}
         </div>
 
         {/* Drag overlay */}
         {isDragging && (
-          <div className="absolute inset-0 z-30 border-2 border-dashed border-white/40 bg-black/60 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 z-30 border-4 border-dashed border-rose-500/30 bg-[#050508]/80 flex items-center justify-center pointer-events-none backdrop-blur-sm">
             <div className="text-center">
-              <Upload className="w-10 h-10 mx-auto mb-3 text-white" />
-              <p className="font-black text-white text-xl uppercase tracking-widest">Drop Your Design</p>
+              <div className="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                 <Upload className="w-8 h-8 text-rose-500" />
+              </div>
+              <p className="font-black text-white text-2xl uppercase tracking-tighter italic">Transfer Data</p>
             </div>
           </div>
         )}
 
         {/* T-shirt photo mockup */}
-        <div className="relative h-full max-h-[calc(100%-80px)] flex items-center justify-center py-8">
-          <div className="relative h-full max-h-full">
+        <div className="relative w-full h-full max-h-[85vh] flex items-center justify-center p-4">
+          <div className="relative h-full aspect-[4/5] md:aspect-auto">
             <img
               src={mockupSrc}
               alt="T-shirt mockup"
-              className="h-full w-auto object-contain object-top max-w-none drop-shadow-2xl select-none"
-              style={{ maxHeight: "100%", maxWidth: "500px" }}
+              className="h-full w-auto object-contain object-center drop-shadow-[0_35px_60px_rgba(0,0,0,0.8)] select-none pointer-events-none"
+              style={{ maxHeight: "100%", maxWidth: "100%" }}
               draggable={false}
             />
 
@@ -201,19 +243,21 @@ export default function Customize() {
               style={{ top: printArea.top, left: printArea.left, width: printArea.width, height: printArea.height }}
             >
               {designDataUrl ? (
-                <img
+                <motion.img
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 0.92, scale: 1 }}
                   src={designDataUrl}
                   alt="Your design"
                   className="w-full h-full object-contain"
-                  style={{ mixBlendMode: "screen", opacity: 0.92 }}
+                  style={{ mixBlendMode: "screen" }}
                 />
               ) : (
                 <div
-                  className="w-full h-full border border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer pointer-events-auto"
+                  className="w-full h-full border border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer pointer-events-auto hover:bg-white/5 transition-colors rounded-lg"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <p className="font-black text-white/30 text-xs uppercase tracking-widest text-center leading-tight">
-                    Your<br />Design<br />Here
+                  <p className="font-black text-slate-800 text-[10px] uppercase tracking-[0.3em] text-center leading-tight">
+                    DROP<br />ASSET<br />HERE
                   </p>
                 </div>
               )}
@@ -221,78 +265,77 @@ export default function Customize() {
           </div>
         </div>
 
-        {/* Bottom nav links */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          <Link
-            href="/products"
-            className="bg-black/70 backdrop-blur border border-[#2a2a2a] text-[10px] font-black px-4 py-2 uppercase tracking-widest text-zinc-500 hover:text-white hover:border-zinc-500 transition-all"
-          >
-            Browse Products
-          </Link>
+        {/* Bottom utility links */}
+        <div className="absolute bottom-6 flex gap-4">
           <Link
             href="/design-templates"
-            className="bg-black/70 backdrop-blur border border-[#2a2a2a] text-[10px] font-black px-4 py-2 uppercase tracking-widest text-zinc-500 hover:text-white hover:border-zinc-500 transition-all"
+            className="bg-white/5 backdrop-blur border border-white/10 text-[9px] font-black px-6 py-3 uppercase tracking-[0.2em] text-slate-400 hover:text-white hover:border-white/30 transition-all rounded-xl"
           >
-            Design Templates
+            Vault Templates
           </Link>
         </div>
       </div>
 
-      {/* ── RIGHT CONFIG PANEL ── */}
-      <div className="w-[300px] flex-shrink-0 bg-[#0d0d0d] border-l border-[#1a1a1a] flex flex-col overflow-y-auto">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-[#1a1a1a]">
-          <h2 className="font-black uppercase tracking-tight text-white text-lg leading-tight">
-            Design Custom<br />T-Shirt
+      {/* ── RIGHT CONFIG PANEL (DESIGN + OPTIONS TABS) ── */}
+      <div className={`w-full md:w-[320px] lg:w-[380px] flex-shrink-0 bg-[#0a0a0c] border-l border-white/5 flex flex-col overflow-y-auto transition-all ${
+        activeTab === "preview" ? "hidden md:flex" : "flex"
+      }`}>
+        
+        {/* Header (Desktop) */}
+        <div className="hidden md:block px-8 py-8 border-b border-white/5">
+          <h2 className="font-black uppercase tracking-tighter text-white text-3xl italic leading-[0.8]">
+            Studio<br />Manifest
           </h2>
-          <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-wider mt-1">Heavyweight Black · 300gsm</p>
+          <div className="flex items-center gap-2 mt-4">
+             <div className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Heavyweight Drop · 300gsm</p>
+          </div>
         </div>
 
-        <div className="flex-1 flex flex-col gap-0 divide-y divide-[#1a1a1a]">
-
-          {/* UPLOAD DESIGN */}
-          <div className="px-6 py-5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Your Design</p>
+        <div className="flex-1 flex flex-col p-6 lg:p-8 space-y-10">
+          
+          {/* UPLOAD SECTION */}
+          <div className={activeTab === "design" || activeTab === "preview" ? "block" : "hidden md:block"}>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 mb-6">01. Visual Assets</p>
 
             {designDataUrl ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-3 bg-[#111] border border-[#1f1f1f]">
-                  <div className="w-14 h-14 bg-black border border-[#2a2a2a] overflow-hidden flex-shrink-0">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/2 border border-white/5 group">
+                  <div className="w-16 h-16 bg-black border border-white/10 rounded-xl overflow-hidden flex-shrink-0">
                     <img src={designDataUrl} alt="Design" className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-black text-[11px] uppercase tracking-wide text-white">Design Active</p>
-                    <p className={`text-[10px] font-bold tracking-wider uppercase mt-0.5 ${isUploading ? "text-zinc-400" : "text-[#e63329]"}`}>
-                      {isUploading ? "Uploading..." : "Live on Tee"}
+                    <p className="font-black text-[11px] uppercase tracking-widest text-white">Asset Uploaded</p>
+                    <p className="text-[9px] font-bold tracking-widest uppercase mt-1 text-slate-500">
+                      {isUploading ? "Syncing to Cloud..." : "Integrated with T-Shirt"}
                     </p>
                   </div>
                   <button
                     onClick={() => { setDesignDataUrl(null); setUploadedUrl(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                    className="text-zinc-600 hover:text-white transition-colors flex-shrink-0"
+                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-2.5 border border-[#2a2a2a] hover:border-white text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
+                  className="w-full py-4 rounded-xl border border-white/5 hover:border-rose-500/50 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all bg-white/2"
                 >
-                  Replace Design
+                  Upload New Layer
                 </button>
               </div>
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed p-6 flex flex-col items-center text-center cursor-pointer transition-all ${
-                  isDragging ? "border-white bg-[#1a1a1a]" : "border-[#2a2a2a] hover:border-[#444] hover:bg-[#111]"
+                className={`border-2 border-dashed rounded-[2rem] p-10 flex flex-col items-center text-center cursor-pointer transition-all ${
+                  isDragging ? "border-rose-500 bg-rose-500/5" : "border-white/5 hover:border-white/20 hover:bg-white/2"
                 }`}
               >
-                <div className="w-10 h-10 bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-3">
-                  <Upload className="w-5 h-5 text-zinc-400" />
+                <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
+                  <Upload className="w-6 h-6 text-slate-500" />
                 </div>
-                <p className="font-black uppercase tracking-wider text-[12px] text-white mb-1">Upload Artwork</p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-zinc-600">PNG · JPG · Max 10MB</p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-zinc-700 mt-0.5">or drag &amp; drop anywhere</p>
+                <p className="font-black uppercase tracking-widest text-xs text-white mb-2">Import Design</p>
+                <p className="text-[9px] font-bold uppercase tracking-wider text-slate-600">Vector · High-Res PNG · JPG</p>
               </div>
             )}
 
@@ -305,108 +348,92 @@ export default function Customize() {
             />
           </div>
 
-          {/* BROWSE TEMPLATES */}
-          <div className="px-6 py-4">
-            <Link
-              href="/design-templates"
-              className="flex items-center justify-between w-full group"
-            >
+          {/* CONFIGURATION SECTION */}
+          <div className={activeTab === "options" || activeTab === "preview" ? "block" : "hidden md:block"}>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 mb-6">02. Parameters</p>
+            
+            <div className="space-y-8">
+              {/* SIZE */}
               <div>
-                <p className="font-black uppercase tracking-wider text-[12px] text-white">Browse Templates</p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-zinc-600 mt-0.5">16 designs available</p>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">Select Size</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white bg-rose-600 px-2 py-0.5 rounded">{size}</p>
+                </div>
+                <div className="grid grid-cols-6 gap-2">
+                  {SIZES.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={`h-10 rounded-lg border-2 font-black text-[10px] transition-all ${
+                        size === s
+                          ? "border-rose-600 bg-rose-600 text-white"
+                          : "border-white/5 text-slate-500 hover:border-white/20 hover:text-white"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
-            </Link>
-          </div>
 
-          {/* SIZE */}
-          <div className="px-6 py-5">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Size</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-white">{size}</p>
-            </div>
-            <div className="grid grid-cols-6 gap-1.5">
-              {SIZES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  className={`h-9 border-2 font-black text-[10px] transition-all ${
-                    size === s
-                      ? "border-white bg-white text-black"
-                      : "border-[#2a2a2a] text-zinc-400 hover:border-zinc-500 hover:text-white"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* COLOR */}
-          <div className="px-6 py-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Color</p>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#111] border-2 border-white rounded-sm flex-shrink-0" />
-              <span className="font-black uppercase tracking-wider text-[11px] text-white">Heavyweight Black</span>
-            </div>
-          </div>
-
-          {/* QUANTITY */}
-          <div className="px-6 py-5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-3">Quantity</p>
-            <div className="flex items-center gap-0 border-2 border-[#2a2a2a] bg-[#080808] w-fit">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-[#1a1a1a] transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-10 text-center font-black text-sm text-white">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-[#1a1a1a] transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* PRICE */}
-          <div className="px-6 py-4 bg-[#080808]">
-            <div className="flex items-end justify-between">
+              {/* QUANTITY */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Total</p>
-                <p className="font-black text-[11px] uppercase tracking-wide text-zinc-500 mt-0.5">Free shipping · No minimum</p>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="font-black text-2xl text-white">৳{(price * quantity).toFixed(0)}</p>
-                <p className="text-zinc-600 font-bold text-sm line-through">৳{(999 * quantity).toFixed(0)}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 italic">Quantity</p>
+                <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-white/10 bg-[#050508] w-fit">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-white transition-colors border-r border-white/5"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-14 text-center font-black text-base text-white">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-white transition-colors border-l border-white/5"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* CTA BUTTONS */}
-        <div className="p-4 border-t border-[#1a1a1a] space-y-2 flex-shrink-0">
-          <button
-            onClick={handleBuyNow}
-            disabled={isBuyingNow || !customProduct}
-            className="w-full h-12 bg-[#e63329] hover:bg-white hover:text-black text-white font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isBuyingNow ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
-            ) : (
-              <><Zap className="w-4 h-4" fill="currentColor" />Buy Now — ৳{(price * quantity).toFixed(0)}</>
-            )}
-          </button>
-          <button
-            onClick={handleAddToCart}
-            disabled={addCartItem.isPending || !customProduct}
-            className="w-full h-10 border-2 border-[#2a2a2a] hover:border-white text-zinc-400 hover:text-white font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {addCartItem.isPending ? "Adding..." : "Add to Bag"}
-          </button>
+          {/* FINAL SUMMARY */}
+          <div className="mt-auto pt-8 border-t border-white/5">
+             <div className="flex items-end justify-between mb-8">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">Total Valuation</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-rose-500">Premium Cotton · Free Shipping</p>
+                </div>
+                <div className="text-right">
+                   <p className="text-4xl font-black text-white italic tracking-tighter leading-none">৳{(price * quantity).toFixed(0)}</p>
+                   <p className="text-[10px] font-bold text-slate-700 line-through mt-1 tracking-widest">৳{(1850 * quantity).toFixed(0)}</p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 gap-3">
+               <button
+                onClick={handleBuyNow}
+                disabled={isBuyingNow || !customProduct}
+                className="w-full h-16 bg-rose-600 hover:bg-white hover:text-black text-white font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3 disabled:opacity-50 rounded-2xl shadow-xl shadow-rose-600/10 group"
+              >
+                {isBuyingNow ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Uplinking...</>
+                ) : (
+                  <><Zap className="w-5 h-5 group-hover:scale-125 transition-transform" fill="currentColor" /> Secure This Drop</>
+                )}
+              </button>
+              <button
+                onClick={handleAddToCart}
+                disabled={addCartItem.isPending || !customProduct}
+                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-slate-500 hover:text-white hover:bg-white/10 font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                {addCartItem.isPending ? "Adding..." : "Stash in Bag"}
+              </button>
+             </div>
+          </div>
+
         </div>
       </div>
     </div>

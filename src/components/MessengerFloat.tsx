@@ -13,15 +13,19 @@ export function MessengerFloat() {
     return () => window.removeEventListener("sticky-bar", handler);
   }, []);
 
-  const messengerUrl = settings?.storeInfo?.siMessengerUrl || "besimple75";
-  const url = messengerUrl.startsWith("http") ? messengerUrl : `https://m.me/${messengerUrl.replace("@", "")}`;
+  const messengerUrl = settings?.storeInfo?.siMessengerUrl || "";
+  const fallback = "besimple75";
+  const path = messengerUrl.replace("@", "").trim() || fallback;
+  const url = messengerUrl.startsWith("http") ? messengerUrl : `https://m.me/${path}`;
+
+  const bottomClass = shifted ? "max-md:bottom-[19rem] md:bottom-[19rem]" : "bottom-44 max-md:bottom-44 md:bottom-[7.25rem]";
 
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`fixed ${shifted ? 'bottom-[300px]' : 'bottom-[128px]'} right-12 md:right-8 z-[10000] flex items-center justify-center w-14 h-14 rounded-full bg-[#0084FF] text-white shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all duration-300 group`}
+      className={`fixed right-5 md:right-8 z-[9999] flex items-center justify-center w-14 h-14 rounded-full bg-[#0084FF] text-white shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-all duration-300 group ${bottomClass}`}
       aria-label="Chat on Messenger"
     >
       <FaFacebookMessenger className="w-7 h-7" />

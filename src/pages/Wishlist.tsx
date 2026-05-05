@@ -1,13 +1,9 @@
-import { useGetProducts } from "@/lib/api";
 import { Link } from "wouter";
 import { Heart, ShoppingBag, ArrowLeft, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Wishlist() {
-  // Wishlist logic would ideally come from a store, for now let's use a mock or state
-  // I'll assume we'll use the cart-store for wishlist later
-  const products = useGetProducts();
-  const wishlistItems = products.data?.slice(0, 2) || []; // Mock for now
+  const wishlistItems: never[] = [];
 
   return (
     <div className="min-h-screen pt-32 pb-20" style={{ background: "#050508" }}>

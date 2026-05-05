@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import {
   LayoutDashboard, ShoppingCart, Users, Package, Settings, Store,
-  LogOut, ExternalLink, Menu, X, Flame, ChevronRight, Zap, Tag
+  LogOut, ExternalLink, Menu, X, Flame, ChevronRight, Zap, Tag, Layers
 } from "lucide-react";
 
 interface AdminLayoutProps { children: React.ReactNode; }
@@ -77,9 +77,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Bottom */}
       <div className="p-4 space-y-0.5" style={{ borderTop: "1px solid rgba(255,23,68,0.08)" }}>
+        <a href="/design-templates" target="_blank" rel="noopener noreferrer">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-300 transition-colors cursor-pointer">
+            <Layers className="w-4 h-4" /><span>Template gallery</span>
+          </div>
+        </a>
         <a href="/" target="_blank" rel="noopener noreferrer">
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-300 transition-colors cursor-pointer">
-            <ExternalLink className="w-4 h-4" /><span>View Store</span>
+            <ExternalLink className="w-4 h-4" /><span>View store</span>
           </div>
         </a>
         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-red-400 transition-colors">

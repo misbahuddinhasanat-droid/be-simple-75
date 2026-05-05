@@ -4,6 +4,8 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag?: (...args: unknown[]) => void;
+    fbq?: (...args: unknown[]) => void;
+    _fbq?: unknown;
   }
 }
 
@@ -21,31 +23,23 @@ export function useGTM() {
         // ── Google Tag Manager ─────────────────────────────────────
         if (gtmId && gtmId.startsWith("GTM-")) {
           gtmLoaded = true;
-
-          // dataLayer init
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-
-          // Head script
           const script = document.createElement("script");
           script.async = true;
           script.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
           document.head.appendChild(script);
 
-          // Body noscript iframe
           const noscript = document.createElement("noscript");
           const iframe = document.createElement("iframe");
           iframe.src = `https://www.googletagmanager.com/ns.html?id=${gtmId}`;
-          iframe.height = "0";
-          iframe.width = "0";
-          iframe.style.display = "none";
-          iframe.style.visibility = "hidden";
+          iframe.height = "0"; iframe.width = "0"; iframe.style.display = "none"; iframe.style.visibility = "hidden";
           noscript.appendChild(iframe);
           document.body.prepend(noscript);
         }
 
         // ── Meta Pixel ─────────────────────────────────────────────
-        if (pixelId) {
+        if (pixelId && !window.fbq) {
           const pixelScript = document.createElement("script");
           pixelScript.innerHTML = `
             !function(f,b,e,v,n,t,s)
@@ -74,5 +68,12 @@ export function useGTM() {
 export function pushGTMEvent(event: string, data?: Record<string, unknown>) {
   if (typeof window !== "undefined" && window.dataLayer) {
     window.dataLayer.push({ event, ...data });
+  }
+}
+
+// Push Meta Pixel events
+export function pushPixelEvent(event: string, data?: Record<string, unknown>) {
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", event, data);
   }
 }

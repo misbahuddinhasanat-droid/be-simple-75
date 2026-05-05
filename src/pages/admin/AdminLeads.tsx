@@ -25,9 +25,15 @@ const GRADE_META: Record<string, { label: string; color: string; bg: string; ico
 };
 
 interface Lead {
-  id: number; name: string; phone: string; address: string;
-  productInterest: string; message: string | null;
-  status: string; createdAt: string;
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  cartItems: unknown[];
+  cartTotal: number;
+  status: string;
+  notes: string;
+  createdAt: string;
 }
 interface FraudResult { grade: string; score: number; reason: string; }
 
@@ -59,7 +65,16 @@ export default function AdminLeads() {
   useEffect(() => {
     let list = [...leads].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     if (statusFilter !== "all") list = list.filter(l => l.status === statusFilter);
-    if (search.trim()) { const q = search.toLowerCase(); list = list.filter(l => l.name.toLowerCase().includes(q) || l.phone.includes(q)); }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (l) =>
+          l.name.toLowerCase().includes(q) ||
+          l.phone.includes(q) ||
+          (l.email && l.email.toLowerCase().includes(q)) ||
+          (l.notes && l.notes.toLowerCase().includes(q)),
+      );
+    }
     setFiltered(list);
   }, [leads, statusFilter, search]);
 
@@ -72,13 +87,20 @@ export default function AdminLeads() {
     setUpdating(null);
   };
 
+  const isContactLead = (l: Lead) => l.phone.startsWith("CX-") || l.notes.startsWith("[contact]");
+
   const checkFraud = async (lead: Lead) => {
+    if (isContactLead(lead)) return;
     setFraudLoading(prev => ({ ...prev, [lead.id]: true }));
     try {
       const res = await fetch("/api/admin/fraud-check", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY },
-        body: JSON.stringify({ name: lead.name, phone: lead.phone, address: lead.address }),
+        body: JSON.stringify({
+          name: lead.name,
+          phone: lead.phone,
+          address: lead.notes || "",
+        }),
       });
       const data = await res.json();
       setFraudMap(prev => ({ ...prev, [lead.id]: data }));
@@ -170,6 +192,11 @@ export default function AdminLeads() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-xs font-black uppercase tracking-wide text-white truncate">{lead.name}</p>
+                          {isContactLead(lead) && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-violet-500/15 text-violet-400 border border-violet-500/25">
+                              Contact
+                            </span>
+                          )}
                           {fraud && fraudGradeMeta && (
                             <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest"
                               style={{ background: fraudGradeMeta.bg, color: fraudGradeMeta.color, border: `1px solid ${fraudGradeMeta.color}40` }}>
@@ -177,7 +204,9 @@ export default function AdminLeads() {
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] font-bold text-slate-600">{lead.phone} · {lead.productInterest}</p>
+                        <p className="text-[10px] font-bold text-slate-600 truncate">
+                          {lead.email || "—"} · {isContactLead(lead) ? "Form" : `${lead.cartItems?.length ?? 0} SKU · ৳${lead.cartTotal}`}
+                        </p>
                       </div>
                       <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex-shrink-0"
                         style={{ background: cfg.bg, color: cfg.dot, border: `1px solid ${cfg.dot}30` }}>
@@ -191,23 +220,40 @@ export default function AdminLeads() {
                         {/* Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="p-4 rounded-xl space-y-2 text-xs" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,23,68,0.08)" }}>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Lead Details</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">{isContactLead(lead) ? "Message" : "Lead / Cart"}</p>
                             <p className="font-bold text-white">{lead.name}</p>
-                            <p className="font-bold text-slate-400">{lead.phone}</p>
-                            <p className="font-bold text-slate-500 leading-relaxed">{lead.address}</p>
-                            <p className="font-bold" style={{ color: "#ff1744" }}>{lead.productInterest}</p>
-                            {lead.message && <p className="text-slate-600 italic">"{lead.message}"</p>}
+                            <p className="font-bold text-slate-400">{isContactLead(lead) ? lead.email : lead.phone}</p>
+                            {!isContactLead(lead) && <p className="font-bold text-slate-400">{lead.email}</p>}
+                            {!isContactLead(lead) && (
+                              <>
+                                <p className="text-[10px] font-bold text-slate-500 mt-2">Cart preview</p>
+                                <ul className="text-[10px] text-slate-400 list-disc pl-4 space-y-1 max-h-32 overflow-auto">
+                                  {(lead.cartItems as { productName?: string; quantity?: number }[]).slice(0, 8).map((c, idx) => (
+                                    <li key={idx}>{(c.quantity ?? 1)}× {c.productName ?? "Item"}</li>
+                                  ))}
+                                </ul>
+                                <p className="font-bold text-rose-400">Total ৳{lead.cartTotal}</p>
+                              </>
+                            )}
+                            {lead.notes && (
+                              <p className="text-slate-300 text-[11px] leading-relaxed whitespace-pre-wrap border-t border-white/5 pt-2 mt-2">
+                                {lead.notes.replace(/^\[contact\]\s*/, "")}
+                              </p>
+                            )}
                             <p className="text-slate-700 text-[9px] uppercase tracking-widest">{new Date(lead.createdAt).toLocaleString("en-BD")}</p>
                           </div>
 
                           {/* Fraud Check Panel */}
                           <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,23,68,0.08)" }}>
                             <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-3">Fraud Intelligence</p>
-                            {!fraud && !fraudLoading[lead.id] && (
+                            {!isContactLead(lead) && !fraud && !fraudLoading[lead.id] && (
                               <button onClick={() => checkFraud(lead)} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all"
                                 style={{ background: "linear-gradient(135deg, #ff1744, #ff4500)", color: "white", boxShadow: "0 0 20px rgba(255,23,68,0.3)" }}>
                                 <Shield className="w-4 h-4" />Run Fraud Check
                               </button>
+                            )}
+                            {isContactLead(lead) && (
+                              <p className="text-[10px] font-bold text-slate-600 text-center py-4">Website contact — no COD fraud profile.</p>
                             )}
                             {fraudLoading[lead.id] && (
                               <div className="flex flex-col items-center justify-center py-6 gap-3">

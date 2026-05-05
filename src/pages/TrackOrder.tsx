@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Search, Package, Truck, CheckCircle2, Clock, MapPin, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,12 @@ export default function TrackOrder() {
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<OrderStatus | null>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const oid = q.get("order") || q.get("id") || q.get("orderId");
+    if (oid) setOrderId(oid);
+  }, []);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();

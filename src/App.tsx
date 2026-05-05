@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Redirect, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +25,7 @@ import Dashboard from "@/pages/Dashboard";
 import Wishlist from "@/pages/Wishlist";
 import TrackOrder from "@/pages/TrackOrder";
 import FAQ from "@/pages/FAQ";
+import About from "@/pages/About";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -74,9 +75,6 @@ function Router() {
       <Route path="/admin/settings">
         <AdminGuard><AdminSettings /></AdminGuard>
       </Route>
-      <Route path="/admin/categories">
-        <AdminGuard><AdminCategories /></AdminGuard>
-      </Route>
       <Route path="/admin/store-info">
         <AdminGuard><AdminStoreInfo /></AdminGuard>
       </Route>
@@ -97,6 +95,7 @@ function Router() {
             <Route path="/product/:id" component={ProductDetail} />
             <Route path="/customize" component={Customize} />
             <Route path="/design-templates" component={DesignTemplates} />
+            <Route path="/templates"><Redirect to="/design-templates" /></Route>
             <Route path="/cart" component={Cart} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-confirmation/:id" component={OrderConfirmation} />
@@ -109,6 +108,7 @@ function Router() {
             <Route path="/wishlist" component={Wishlist} />
             <Route path="/track-order" component={TrackOrder} />
             <Route path="/faq" component={FAQ} />
+            <Route path="/about" component={About} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

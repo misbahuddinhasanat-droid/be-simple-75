@@ -14,14 +14,15 @@ export function WhatsAppFloat() {
   }, []);
 
   // Fallback to a default number if settings haven't loaded yet to ensure button is visible
-  const finalUrl = whatsappUrl || `https://wa.me/8801700000000`; 
+  const finalUrl = whatsappUrl || `https://wa.me/8801700000000`;
+  const bottomClass = shifted ? "max-md:bottom-52 md:bottom-52" : "bottom-28 max-md:bottom-24 md:bottom-10";
 
   return (
     <a
       href={finalUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`fixed ${shifted ? 'bottom-[228px]' : 'bottom-10'} right-12 md:right-8 z-[10000] flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-300`}
+      className={`fixed right-5 md:right-8 z-[10000] flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-300 ${bottomClass}`}
       aria-label="Chat on WhatsApp"
     >
       <MessageCircle className="w-7 h-7" />

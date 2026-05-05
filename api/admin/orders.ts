@@ -6,6 +6,7 @@ import { requireAdmin, cors } from "../_lib/admin-auth.js";
 function formatOrder(o: typeof ordersTable.$inferSelect) {
   return {
     id: o.id, customerName: o.customerName, email: o.email,
+    customerPhone: o.customerPhone ?? "",
     address: o.address, city: o.city, country: o.country, zipCode: o.zipCode,
     status: o.status, total: parseFloat(o.total),
     items: o.items as unknown[], createdAt: o.createdAt.toISOString(),

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const ADMIN_KEY = process.env.ADMIN_KEY || "besimple2024";
+/** Must match Vercel env `ADMIN_KEY` and `/api/.env`; frontend login uses Besimple90@@ by default. */
+const ADMIN_KEY = process.env.ADMIN_KEY || "Besimple90@@";
 
 export function requireAdmin(req: VercelRequest, res: VercelResponse): boolean {
   const key = req.headers["x-admin-key"] || req.query["adminKey"];

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ShoppingBag, Instagram, Facebook, Mail, MessageCircle } from "lucide-react";
+import { ShoppingBag, Instagram, Facebook, MessageCircle } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 
 export function Footer() {
@@ -14,7 +14,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src="/logo.png" alt="Be Simple 75" className="w-12 h-12 object-contain" style={{ filter: "drop-shadow(0 0 12px rgba(255,255,255,0.8)) brightness(1.4)" }} />
+              <img src="/logo.png" alt="Be Simple 75" className="w-16 h-16 object-contain" style={{ filter: "drop-shadow(0 0 28px rgba(255,255,255,1)) brightness(3) contrast(1.12)" }} />
               <div>
                 <span className="font-black text-2xl uppercase tracking-wider text-white">Be Simple 75</span>
                 <p className="text-[9px] font-black tracking-[0.4em] text-rose-500 uppercase -mt-1">Streetwear Bangladesh</p>
@@ -23,6 +23,11 @@ export function Footer() {
             <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs">
               Where self-expression meets the streets. Premium streetwear built for those who refuse to blend in.
             </p>
+            {storeInfo?.email ? (
+              <a href={`mailto:${storeInfo.email}`} className="inline-block mt-4 text-[11px] font-black uppercase tracking-widest text-rose-500 hover:text-white transition-colors">
+                {storeInfo.email}
+              </a>
+            ) : null}
             <div className="flex flex-wrap gap-4 mt-8">
               {[
                 { icon: Instagram, color: "#ff1744", label: "Instagram", href: storeInfo?.instagramUrl },
@@ -51,6 +56,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm font-medium">
               {[
                 { href: "/contact", label: "Contact Us" },
+                { href: "/about", label: "About Us" },
                 { href: "/returns", label: "Return Policy" },
                 { href: "/privacy", label: "Privacy Policy" },
                 { href: "/faq", label: "FAQ" }
