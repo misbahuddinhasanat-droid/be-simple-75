@@ -44,7 +44,7 @@ export default function Products() {
 
       <div className="container px-4 md:px-8 py-12">
         {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[1,2,3,4,5,6,7,8].map(i => (
               <div key={i} className="space-y-3">
                 <div className="aspect-[4/5] rounded-xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)" }} />
@@ -53,7 +53,7 @@ export default function Products() {
             ))}
           </div>
         ) : products && products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {products.map(product => (
               <div key={product.id} className="group relative product-card-hover">
                 <div className="aspect-[4/5] overflow-hidden mb-4 relative rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,23,68,0.08)" }}>
