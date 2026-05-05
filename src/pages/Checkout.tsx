@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, Zap, Ticket, CreditCard, ShoppingBag } from "lucide-react";
+import { Loader2, ShieldCheck, Zap, Ticket, CreditCard, ShoppingBag, User, Truck } from "lucide-react";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { useSettings } from "@/hooks/useSettings";
 
